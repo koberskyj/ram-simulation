@@ -1,38 +1,28 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { useAppStore } from './store';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Homepage from '@/pages/Homepage';
+import Aboutpage from '@/pages/Aboutpage';
+import Header from '@/components/Header';
+import Footer from './components/Footer';
 
-function Home() {
-  const { count, increment } = useAppStore();
-
+function RouteList() {
   return (
-    <div className='p-4'>
-      <h1 className='text-2xl font-bold mb-4'>Home</h1>
-      <p className='mb-4'>Count: {count}</p>
-      <Button onClick={increment} className='mr-2'>Increment</Button>
+    <div className='max-w-[1280px] m-auto w-full px-2 flex-grow-1'>
+      <Routes>
+        <Route path='/' element={<Homepage />} />
+        <Route path='/about' element={<Aboutpage />} />
+      </Routes>
     </div>
   );
-}
-
-function About() {
-  return <div className='p-4'>
-    <h1 className='text-2xl font-bold'>About</h1>
-  </div>;
 }
 
 function App() {
   return (
     <Router>
-      <div className='p-4'>
-        <nav className='mb-4'>
-          <Link to='/' className='mr-4'>Home</Link>
-          <Link to='/about'>About</Link>
-        </nav>
-        <Routes>
-          <Route path='/' element={<Home />} />
-          <Route path='/about' element={<About />} />
-        </Routes>
-      </div>
+      <div className='bg-background text-foreground min-h-svh antialiased flex flex-col'>
+        <Header />
+        <RouteList />
+        <Footer />
+      </div>    
     </Router>
   );
 }

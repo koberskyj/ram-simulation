@@ -1,6 +1,6 @@
 {
-  "name": "app",
-  "private": true,
+  "name": "ram-simulation",
+  "private": false,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -11,7 +11,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
-  "homepage": "https://MetisCZ.github.io/ram-simulation/",
+  "homepage": "https://ram.koberskyj.cz/",
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.2",
     "@tailwindcss/postcss": "^4.0.12",
