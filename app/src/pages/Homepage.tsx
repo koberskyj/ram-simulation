@@ -3,7 +3,6 @@ import ProgramUnit from "@/components/machines/ProgramUnit";
 import WorkingMemory from "@/components/machines/WorkingMemory";
 import { Button } from "@/components/ui/button";
 import RAMachine, { program } from "@/lib/RAMachine";
-import { useAppStore } from "@/store";
 import { useMemo, useState } from "react";
 
 function Homepage() {
@@ -12,7 +11,7 @@ function Homepage() {
 
   const ram = useMemo(() => {
     const ram = new RAMachine();
-    ram.input = [13, -2, 42, 5, 17, 0];
+    ram.input = [13, -2, 42, 5, 17];
     ram.programUnit = program;
     return ram;
   }, [])

@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "echo ram.koberskyj.cz > ./dist/CNAME && gh-pages -d dist"
   },
   "homepage": "https://ram.koberskyj.cz/",
   "dependencies": {
