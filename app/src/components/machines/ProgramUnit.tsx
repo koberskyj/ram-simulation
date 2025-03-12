@@ -17,7 +17,7 @@ export default function ProgramUnit({ instructionSet, instructionPointer, ...pro
       <CardContent>
         {instructionSet.map((instruction, index) => 
           <div key={index} className={index == instructionPointer ? 'text-red-700' : ''}>
-            {index}: {instruction.asComponent()}
+            {index+1}: {instruction.asComponent()}
           </div>
         )}
       </CardContent>
