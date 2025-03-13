@@ -5,7 +5,7 @@ interface Instruction {
   asComponent(): JSX.Element;
 }
 
-interface MachineState {
+interface RAMachineState {
   instructionPointer: number;
   memory: Map<number, number>;
   input: number[];
@@ -40,7 +40,7 @@ class RAMachine {
   public input: Tape;
   public output: Tape;
   public halted: boolean;
-  private history: MachineState[];
+  private history: RAMachineState[];
 
   constructor(program: InstructionSet = [], input: Tape = []) {
     this.programUnit = program;
@@ -103,7 +103,7 @@ class RAMachine {
 
   private saveState(): void {
 
-    const state: MachineState = {
+    const state: RAMachineState = {
       instructionPointer: this.instructionPointer,
       memory: new Map(this.memory),
       input: this.input.slice(),
@@ -114,7 +114,7 @@ class RAMachine {
     this.history.push(state);
   }
 
-  private restoreState(state: MachineState): void {
+  private restoreState(state: RAMachineState): void {
     this.instructionPointer = state.instructionPointer;
     this.memory = new Map(state.memory);
     this.input = state.input.slice();
@@ -125,10 +125,11 @@ class RAMachine {
   reset(): void {
     if(this.history.length > 0) {
       this.restoreState(this.history[0]);
+      this.history = [];
     }
   }
 
-  getPreviousState(): MachineState | undefined {
+  getPreviousState(): RAMachineState | undefined {
     return this.history.length ? this.history[this.history.length - 1] : undefined;
   }
 }
