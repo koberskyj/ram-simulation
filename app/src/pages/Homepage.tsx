@@ -1,11 +1,12 @@
-import ProgramTape from "@/components/machines/ProgramTape";
-import ProgramUnit from "@/components/machines/ProgramUnit";
-import TuringTape from "@/components/machines/TuringTape";
-import WorkingMemory from "@/components/machines/WorkingMemory";
+import ProgramTape from "@/components/machines/ram/ProgramTape";
+import ProgramUnit from "@/components/machines/ram/ProgramUnit";
+import TuringTape from "@/components/machines/turing/TuringTape";
+import WorkingMemory from "@/components/machines/ram/WorkingMemory";
 import { Button } from "@/components/ui/button";
 import RAMachine, { program } from "@/lib/RAMachine";
 import { testTuring } from "@/lib/TuringMachine";
 import { useMemo, useState } from "react";
+import TransitionFunctions from "@/components/machines/turing/TransitionFunctions";
 
 function Homepage() {
   const [, setRenderTrigger] = useState(0);
@@ -33,7 +34,8 @@ function Homepage() {
         <Button onClick={() => {turing.step(); forceUpdate(); }} className='mr-2'>Step</Button>
         <Button onClick={() => {turing.run(); forceUpdate(); }} className='mr-2'>Run</Button>
         <TuringTape tape={turing.tape} previousTape={turing.getPreviousState()?.tape} tapePointer={turing.tapePointer} />
-        <p>q<sub>{turing.currentState}</sub></p>
+        <p>Aktuální stav: q<sub>{turing.currentState}</sub></p>
+        <TransitionFunctions funcionts={turing.transitionFunctions} lastTransition={turing.transitionHistory.length > 0 ? turing.transitionHistory[turing.transitionHistory.length-1] : undefined} />
       </div>
       <div className="border p-10">
         <h2>RAM</h2>

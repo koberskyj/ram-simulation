@@ -16,6 +16,17 @@ interface TuringMachineState {
   tape: Tape;
   tapePointer: number;
   currentState: State;
+  transitionHistory: TransitionFunction[];
+}
+
+function equalTransitions(transition1: TransitionFunction, transition2: TransitionFunction): boolean {
+  return (
+    transition1.stateFrom == transition2.stateFrom &&
+    transition1.stateTo == transition2.stateTo &&
+    transition1.symbolFrom == transition2.symbolFrom &&
+    transition1.symbolTo == transition2.symbolTo &&
+    transition1.action == transition2.action
+  );
 }
 
 class TuringMachine {
@@ -26,6 +37,7 @@ class TuringMachine {
   initialState: State;
   finalStates: State[];
   transitionFunctions: TransitionFunction[];
+  transitionHistory: TransitionFunction[];
   private history: TuringMachineState[];
 
   constructor(tape: Tape, states: State[], initialState: State, finalStates: State[], transitionFunctions: TransitionFunction[]) {
@@ -35,6 +47,7 @@ class TuringMachine {
     this.finalStates = finalStates;
     this.transitionFunctions = transitionFunctions;
     this.history = [];
+    this.transitionHistory = [];
     this.currentState = initialState;
   }
 
@@ -68,6 +81,7 @@ class TuringMachine {
         this.tape.set(this.tapePointer, transitionFunction.symbolTo);
         this.currentState = transitionFunction.stateTo;
         this.tapePointer += transitionFunction.action;
+        this.transitionHistory.push(transitionFunction);
         return transitionFunction;
       }
     }
@@ -79,7 +93,8 @@ class TuringMachine {
     const state: TuringMachineState = {
       currentState: this.currentState,
       tape: new Map(this.tape),
-      tapePointer: this.tapePointer
+      tapePointer: this.tapePointer,
+      transitionHistory: this.transitionHistory.slice()
     };
 
     this.history.push(state);
@@ -89,12 +104,14 @@ class TuringMachine {
     this.currentState = state.currentState;
     this.tape = new Map(state.tape);
     this.tapePointer = state.tapePointer;
+    this.transitionHistory = state.transitionHistory.slice();
   }
 
   reset(): void {
     if(this.history.length > 0) {
       this.restoreState(this.history[0]);
       this.history = [];
+      this.transitionHistory = [];
     }
   }
 
@@ -152,5 +169,5 @@ const transitionFunctions: TransitionFunction[] = [
 const testTuring = new TuringMachine(tape, states, 0, ['acc','rej'], transitionFunctions);
 
 export default TuringMachine;
-export { testTuring }
+export { testTuring, equalTransitions }
 export type { State, Symbol, Action, Tape, TransitionFunction, TuringMachineState }
