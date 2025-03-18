@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { equalTransitions, State, TransitionFunction as TFType } from "@/lib/TuringMachine";
+import { equalTransitions, TransitionFunction as TFType } from "@/lib/TuringMachine";
 import TransitionFunction from "./TransitionFunction";
 
 type TransitionFunctionsType = { 

@@ -39,8 +39,9 @@ class TuringMachine {
   transitionFunctions: TransitionFunction[];
   transitionHistory: TransitionFunction[];
   private history: TuringMachineState[];
+  private tapeAlphabet: Symbol[];
 
-  constructor(tape: Tape, states: State[], initialState: State, finalStates: State[], transitionFunctions: TransitionFunction[]) {
+  constructor(tape: Tape, states: State[], initialState: State, finalStates: State[], transitionFunctions: TransitionFunction[], inputAlphabet: Symbol[]) {
     this.tape = tape;
     this.states = states;
     this.initialState = initialState;
@@ -49,6 +50,7 @@ class TuringMachine {
     this.history = [];
     this.transitionHistory = [];
     this.currentState = initialState;
+    this.tapeAlphabet = ['□', ...inputAlphabet];
   }
 
   run(): void {
@@ -118,6 +120,10 @@ class TuringMachine {
   getPreviousState(): TuringMachineState | undefined {
     return this.history.length ? this.history[this.history.length - 1] : undefined;
   }
+
+  getTapeAlphabet() {
+    return this.tapeAlphabet;
+  }
 }
 
 const tape: Tape = new Map<number, Symbol>();
@@ -166,7 +172,7 @@ const transitionFunctions: TransitionFunction[] = [
   { stateFrom: 4, stateTo: 4,     symbolFrom: 'x', symbolTo: 'x', action: -1 },
 ];
 
-const testTuring = new TuringMachine(tape, states, 0, ['acc','rej'], transitionFunctions);
+const testTuring = new TuringMachine(tape, states, 0, ['acc','rej'], transitionFunctions, ['a','b','c']);
 
 export default TuringMachine;
 export { testTuring, equalTransitions }

@@ -13,16 +13,12 @@ function Homepage() {
   const forceUpdate = () => setRenderTrigger(prev => prev + 1);
 
   const ram = useMemo(() => {
-    const ram = new RAMachine();
-    ram.input = [13, -2, 42, 5, 17];
-    ram.programUnit = program;
-    return ram;
+    return new RAMachine(program, [13, -2, 42, 5, 17]);
   }, []);
 
   const turing = useMemo(() => {
     return testTuring;
   }, []);
-  console.log(turing.tape);
 
   return (
     <div className='p-4'>

@@ -1,6 +1,7 @@
 import { JSX } from "react";
 
 interface Instruction {
+  label?: string;
   execute(machine: RAMachine): void;
   asComponent(): JSX.Element;
 }
@@ -16,6 +17,7 @@ interface RAMachineState {
 type Tape = number[];
 type Memory = Map<number, number>;
 type InstructionSet = Instruction[];
+type JumpTarget = number | string;
 
 type Operand = 
   | { type: 'constant'; value: number }
@@ -41,6 +43,7 @@ class RAMachine {
   public output: Tape;
   public halted: boolean;
   private history: RAMachineState[];
+  private labelMap: Map<string, number>;
 
   constructor(program: InstructionSet = [], input: Tape = []) {
     this.programUnit = program;
@@ -50,6 +53,27 @@ class RAMachine {
     this.instructionPointer = 0;
     this.halted = false;
     this.history = [];
+    this.labelMap = new Map<string, number>();
+    this.buildLabelMap();
+  }
+
+  private buildLabelMap(): void {
+    this.programUnit.forEach((instr, index) => {
+      if (instr.label) {
+        if (this.labelMap.has(instr.label)) {
+          throw new Error(`Duplicate label: ${instr.label}`);
+        }
+        this.labelMap.set(instr.label, index);
+      }
+    });
+  }
+
+  public getLabelIndex(name: string): number {
+    const index = this.labelMap.get(name);
+    if (index === undefined) {
+      throw new Error(`Label not found: ${name}`);
+    }
+    return index;
   }
 
   run(): void {
@@ -64,9 +88,11 @@ class RAMachine {
     }
     if(this.instructionPointer < this.programUnit.length) {
       this.saveState();
+      const currentPointer = this.instructionPointer;
       const instr = this.programUnit[this.instructionPointer];
       instr.execute(this);
-      if(!this.halted) {
+
+      if (!this.halted && this.instructionPointer === currentPointer) {
         this.instructionPointer++;
       }
     }
@@ -102,7 +128,6 @@ class RAMachine {
   }
 
   private saveState(): void {
-
     const state: RAMachineState = {
       instructionPointer: this.instructionPointer,
       memory: new Map(this.memory),
@@ -135,11 +160,13 @@ class RAMachine {
 }
 
 class Load implements Instruction {
+  label?: string;
   private register: number;
   private operand: Operand;
-  constructor(register: number, operand: Operand) {
+  constructor(register: number, operand: Operand, label?: string) {
     this.register = register;
     this.operand = operand;
+    this.label = label;
   }
   execute(machine: RAMachine): void {
     const value = resolveOperand(machine, this.operand);
@@ -151,15 +178,17 @@ class Load implements Instruction {
 }
 
 class LoadFromAddress implements Instruction {
+  label?: string;
   private registerWithAddressFrom: number;
   private registerTo: number;
-  constructor(registerTo: number, registerWithAddressFrom: number) {
+  constructor(registerTo: number, registerWithAddressFrom: number, label?: string) {
     this.registerWithAddressFrom = registerWithAddressFrom;
     this.registerTo = registerTo;
+    this.label = label;
   }
   execute(machine: RAMachine): void {
-    const register = machine.readMemory(this.registerWithAddressFrom);
-    const value = machine.readMemory(register);
+    const address = machine.readMemory(this.registerWithAddressFrom);
+    const value = machine.readMemory(address);
     machine.writeMemory(this.registerTo, value);
   }
   asComponent(): JSX.Element {
@@ -168,16 +197,18 @@ class LoadFromAddress implements Instruction {
 }
 
 class LoadToAddress implements Instruction {
+  label?: string;
   private registerFrom: number;
   private registerWithAddressTo: number;
-  constructor(registerWithAddressTo: number, registerFrom: number) {
+  constructor(registerWithAddressTo: number, registerFrom: number, label?: string) {
     this.registerFrom = registerFrom;
     this.registerWithAddressTo = registerWithAddressTo;
+    this.label = label;
   }
   execute(machine: RAMachine): void {
-    const register = machine.readMemory(this.registerWithAddressTo);
+    const address = machine.readMemory(this.registerWithAddressTo);
     const value = machine.readMemory(this.registerFrom);
-    machine.writeMemory(register, value);
+    machine.writeMemory(address, value);
   }
   asComponent(): JSX.Element {
     return <span>[R<sub>{this.registerWithAddressTo}</sub>] := R<sub>{this.registerFrom}</sub></span>;
@@ -185,13 +216,15 @@ class LoadToAddress implements Instruction {
 }
 
 class Add implements Instruction {
+  label?: string;
   private registerTo: number;
   private operand1: Operand;
   private operand2: Operand;
-  constructor(registerTo: number, operand1: Operand, operand2: Operand) {
+  constructor(registerTo: number, operand1: Operand, operand2: Operand, label?: string) {
     this.registerTo = registerTo;
     this.operand1 = operand1;
     this.operand2 = operand2;
+    this.label = label;
   }
   execute(machine: RAMachine): void {
     const value1 = resolveOperand(machine, this.operand1);
@@ -206,13 +239,15 @@ class Add implements Instruction {
 }
 
 class Subtract implements Instruction {
+  label?: string;
   private registerTo: number;
   private operand1: Operand;
   private operand2: Operand;
-  constructor(registerTo: number, operand1: Operand, operand2: Operand) {
+  constructor(registerTo: number, operand1: Operand, operand2: Operand, label?: string) {
     this.registerTo = registerTo;
     this.operand1 = operand1;
     this.operand2 = operand2;
+    this.label = label;
   }
   execute(machine: RAMachine): void {
     const value1 = resolveOperand(machine, this.operand1);
@@ -227,9 +262,11 @@ class Subtract implements Instruction {
 }
 
 class ReadInput implements Instruction {
+  label?: string;
   private registerTo: number;
-  constructor(registerTo: number) {
+  constructor(registerTo: number, label?: string) {
     this.registerTo = registerTo;
+    this.label = label;
   }
   execute(machine: RAMachine): void {
     const value = machine.readInput() ?? 0;
@@ -241,9 +278,11 @@ class ReadInput implements Instruction {
 }
 
 class WriteOutput implements Instruction {
+  label?: string;
   private operandFrom: Operand;
-  constructor(operandFrom: Operand) {
+  constructor(operandFrom: Operand, label?: string) {
     this.operandFrom = operandFrom;
+    this.label = label;
   }
   execute(machine: RAMachine): void {
     const value = resolveOperand(machine, this.operandFrom);
@@ -255,29 +294,40 @@ class WriteOutput implements Instruction {
 }
 
 class Jump implements Instruction {
-  private address: number;
-  constructor(address: number) {
-    this.address = address;
+  label?: string;
+  private target: JumpTarget;
+  constructor(target: JumpTarget, label?: string) {
+    this.target = target;
+    this.label = label;
   }
   execute(machine: RAMachine): void {
-    machine.instructionPointer = this.address - 1 - 1; // -1 because this is still an instruction, -1 because line numbers start from 1
+    let resolvedTarget: number;
+    if (typeof this.target === "string") {
+      resolvedTarget = machine.getLabelIndex(this.target);
+    } else {
+      resolvedTarget = this.target - 1;
+    }
+    machine.instructionPointer = resolvedTarget;
   }
   asComponent(): JSX.Element {
-    return <span>goto {this.address}</span>;
+    return <span>goto {this.target}</span>;
   }
 }
 
+// Conditional jump accepting a JumpTarget.
 type CompareOperation = '=' | '!=' | '<' | '<=' | '>' | '>=';
 class ConditionalJump implements Instruction {
-  private address: number;
+  label?: string;
+  private target: JumpTarget;
   private operand1: Operand;
   private compareOperation: CompareOperation;
   private operand2: Operand;
-  constructor(address: number, operand1: Operand, compareOperation: CompareOperation, operand2: Operand) {
-    this.address = address;
+  constructor(target: JumpTarget, operand1: Operand, compareOperation: CompareOperation, operand2: Operand, label?: string) {
+    this.target = target;
     this.operand1 = operand1;
     this.compareOperation = compareOperation;
     this.operand2 = operand2;
+    this.label = label;
   }
   execute(machine: RAMachine): void {
     const value1 = resolveOperand(machine, this.operand1);
@@ -300,18 +350,27 @@ class ConditionalJump implements Instruction {
     }
 
     if (shouldJump) {
-      machine.instructionPointer = this.address - 1 - 1;
+      let resolvedTarget: number;
+      if (typeof this.target === "string") {
+        resolvedTarget = machine.getLabelIndex(this.target);
+      } else {
+        resolvedTarget = this.target - 1;
+      }
+      machine.instructionPointer = resolvedTarget;
     }
   }
   asComponent(): JSX.Element {
     return (
-      <span>if ({operandToJSX(this.operand1)} {this.compareOperation} {operandToJSX(this.operand2)}) goto {this.address}</span>
+      <span>if ({operandToJSX(this.operand1)} {this.compareOperation} {operandToJSX(this.operand2)}) goto {this.target}</span>
     );
   }
 }
 
 class Halt implements Instruction {
-
+  label?: string;
+  constructor(label?: string) {
+    this.label = label;
+  }
   execute(machine: RAMachine): void {
     machine.halt();
   }
@@ -321,20 +380,20 @@ class Halt implements Instruction {
 }
 
 const program: Instruction[] = [
-  new Load(0, { type: 'constant', value: 3 }),                                                  // R0 := 3
-  new Load(1, { type: 'register', value: 0 }),                                                  // R1 := R0
-  new ReadInput(2),                                                                             // R2 := READ()
-  new ConditionalJump(11, { type: 'register', value: 2 }, '=', { type: 'constant', value: 0 }), // if(R2 = 0) goto L3
-  new LoadToAddress(1, 2),                                                                      // [R1] := R2
-  new Add(1, { type: 'register', value: 1 }, { type: 'constant', value: 1 }),                   // R1 := R1 + 1
-  new Jump(3),                                                                                  // goto L1
-  new Subtract(1, { type: 'register', value: 1 }, { type: 'constant', value: 1 }),              // R1 := R1 - 1
-  new LoadFromAddress(2, 1),                                                                    // R2 := [R1]
-  new WriteOutput({ type: 'register', value: 2 }),                                              // WRITE(R2)
-  new ConditionalJump(8, { type: 'register', value: 1 }, '>', { type: 'register', value: 0 }),  // if(R1 > R0) goto L2
-  new Halt()                                                                                    // halt
+  new Load(0, { type: 'constant', value: 3 }),                                                          //      R0 := 3
+  new Load(1, { type: 'register', value: 0 }),                                                          //      R1 := R0
+  new ReadInput(2, 'L1'),                                                                               // L1 : R2 := READ()
+  new ConditionalJump('L3', { type: 'register', value: 2 }, '=', { type: 'constant', value: 0 }),       //      if(R2 = 0) goto L3
+  new LoadToAddress(1, 2),                                                                              //      [R1] := R2
+  new Add(1, { type: 'register', value: 1 }, { type: 'constant', value: 1 }),                           //      R1 := R1 + 1
+  new Jump('L1'),                                                                                       //      goto L1
+  new Subtract(1, { type: 'register', value: 1 }, { type: 'constant', value: 1 }, 'L2'),                // L2 : R1 := R1 - 1
+  new LoadFromAddress(2, 1),                                                                            //      R2 := [R1]
+  new WriteOutput({ type: 'register', value: 2 }),                                                      //      WRITE(R2)
+  new ConditionalJump('L2', { type: 'register', value: 1 }, '>', { type: 'register', value: 0 }, 'L3'), // L3 : if(R1 > R0) goto L2
+  new Halt()                                                                                            //      halt
 ];
 
 export default RAMachine;
 export { Load, LoadFromAddress, LoadToAddress, Add, Subtract, ReadInput, WriteOutput, Jump, ConditionalJump, Halt, program }
-export type { Instruction, CompareOperation, Tape, Memory, InstructionSet, Operand }
+export type { Instruction, CompareOperation, Tape, Memory, InstructionSet, Operand, JumpTarget }
