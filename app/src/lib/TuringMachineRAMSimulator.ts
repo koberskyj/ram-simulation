@@ -1,4 +1,4 @@
-import RAMachine, { InstructionSet } from "./RAMachine";
+import RAMachine, { Add, InstructionSet, Jump, Load, LoadToAddress } from "./RAMachine";
 import TuringMachine, { Symbol } from "./TuringMachine";
 
 
@@ -28,7 +28,12 @@ class TuringMachineRAMSimulator {
 
   private compileTMToRAMProgram(tm: TuringMachine): InstructionSet {
     let program: InstructionSet = [];
-    // With some kind of Map?
+    tm.transitionFunctions.forEach((func, index) => {
+      const symbolToEnc = this.encodeSymbol(func.symbolTo);
+      program.push(new LoadToAddress(0, symbolToEnc, `q${func.stateFrom}${func.symbolFrom}`));
+      program.push(new Add(1, { type: 'register', value: 0 }, { type: 'constant', value: func.action }));
+      program.push(new Jump(`q${func.stateTo}`)); // TODO
+    });
 
     return program;
   }
