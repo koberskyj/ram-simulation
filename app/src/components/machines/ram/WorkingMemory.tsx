@@ -1,7 +1,7 @@
 import { Memory } from "@/lib/RAMachine";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-type WorkingMemoryType = { 
+export type WorkingMemoryType = { 
   memory: Memory,
   previousMemory?: Memory
 } & React.ComponentProps<"div">;

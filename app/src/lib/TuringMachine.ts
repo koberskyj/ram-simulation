@@ -54,13 +54,13 @@ class TuringMachine {
   }
 
   run(): void {
-    while(!this.finalStates.includes(this.currentState)) {
+    while(!this.hasEnded()) {
       this.step();
     }
   }
 
   step(): void {
-    if(this.finalStates.includes(this.currentState)) {
+    if(this.hasEnded()) {
       return;
     }
 
@@ -90,23 +90,29 @@ class TuringMachine {
     return null;
   }
 
-  private saveState(): void {
-
+  getState(): TuringMachineState {
     const state: TuringMachineState = {
       currentState: this.currentState,
       tape: new Map(this.tape),
       tapePointer: this.tapePointer,
       transitionHistory: this.transitionHistory.slice()
     };
-
-    this.history.push(state);
+    return state;
   }
 
-  private restoreState(state: TuringMachineState): void {
+  private saveState(): void {
+    this.history.push(this.getState());
+  }
+
+  restoreState(state: TuringMachineState): void {
     this.currentState = state.currentState;
     this.tape = new Map(state.tape);
     this.tapePointer = state.tapePointer;
     this.transitionHistory = state.transitionHistory.slice();
+  }
+
+  hasEnded(): boolean {
+    return this.finalStates.includes(this.currentState);
   }
 
   reset(): void {
@@ -172,7 +178,7 @@ const transitionFunctions: TransitionFunction[] = [
   { stateFrom: 4, stateTo: 4,     symbolFrom: 'x', symbolTo: 'x', action: -1 },
 ];
 
-const testTuring = new TuringMachine(tape, states, 0, ['acc','rej'], transitionFunctions, ['a','b','c']);
+const testTuring = new TuringMachine(tape, states, 0, ['acc','rej'], transitionFunctions, ['a','b','c','x']);
 
 export default TuringMachine;
 export { testTuring, equalTransitions }

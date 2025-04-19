@@ -7,6 +7,8 @@ import RAMachine, { program } from "@/lib/RAMachine";
 import { testTuring } from "@/lib/TuringMachine";
 import { useMemo, useState } from "react";
 import TransitionFunctions from "@/components/machines/turing/TransitionFunctions";
+import TuringMachineRAMSimulation from "@/lib/TuringMachineRAMSimulation";
+import WorkingMemoryTMSim from "@/components/machines/ram/WorkingMemoryTMSim";
 
 function Homepage() {
   const [, setRenderTrigger] = useState(0);
@@ -18,6 +20,14 @@ function Homepage() {
 
   const turing = useMemo(() => {
     return testTuring;
+  }, []);
+
+  const turingTBS = useMemo(() => {
+    return testTuring;
+  }, []);
+
+  const compiledTuring = useMemo(() => {
+    return new TuringMachineRAMSimulation(turingTBS);
   }, []);
 
   return (
@@ -33,6 +43,27 @@ function Homepage() {
         <p>Aktuální stav: q<sub>{turing.currentState}</sub></p>
         <TransitionFunctions funcionts={turing.transitionFunctions} lastTransition={turing.transitionHistory.length > 0 ? turing.transitionHistory[turing.transitionHistory.length-1] : undefined} />
       </div>
+
+      <div className="border p-10">
+        <h2>Compiled Turing to RAM</h2>
+        <Button onClick={() => {compiledTuring.reset(); forceUpdate(); }} className='mr-2'>Reset</Button>
+        <Button onClick={() => {compiledTuring.backstep(); forceUpdate(); }} className='mr-2'>Backstep</Button>
+        <Button onClick={() => {compiledTuring.step(); forceUpdate(); }} className='mr-2'>Step</Button>
+        <Button onClick={() => {compiledTuring.run(); forceUpdate(); }} className='mr-2'>Run</Button>
+        <p>Aktuální stav: q<sub>{turing.currentState}</sub></p>
+        <div className="flex flex-wrap">
+          <div className="flex flex-wrap p-5 border">
+            <TransitionFunctions funcionts={turingTBS.transitionFunctions} lastTransition={turingTBS.transitionHistory.length > 0 ? turingTBS.transitionHistory[turingTBS.transitionHistory.length-1] : undefined} />
+            <TuringTape tape={turingTBS.tape} previousTape={turingTBS.getPreviousState()?.tape} tapePointer={turingTBS.tapePointer} horizontal={false} />
+          </div>
+          <div className="flex flex-wrap p-5 border">
+            <ProgramUnit instructionSet={compiledTuring.ram.programUnit} instructionPointer={compiledTuring.ram.instructionPointer} />
+            <WorkingMemoryTMSim tmrs={compiledTuring} />
+          </div>
+        </div>
+      </div>
+
+
       <div className="border p-10">
         <h2>RAM</h2>
         <Button onClick={() => {ram.reset(); forceUpdate(); }} className='mr-2'>Reset</Button>

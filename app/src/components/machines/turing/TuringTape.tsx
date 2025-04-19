@@ -5,13 +5,14 @@ import { Symbol, Tape } from "@/lib/TuringMachine";
 type TuringTapeType = { 
   tape: Tape,
   previousTape?: Tape,
-  tapePointer: number
+  tapePointer: number,
+  horizontal?: boolean
 } & React.ComponentProps<"div">;
 
-export default function TuringTape({ tape, previousTape, tapePointer, ...props}: TuringTapeType) {
+export default function TuringTape({ tape, previousTape, tapePointer, horizontal=true, ...props}: TuringTapeType) {
 
   const tapePart: Symbol[] = [];
-  for(let i=-2; i<15; i++) {
+  for(let i=-3; i<15; i++) {
     tapePart.push(tape.get(i) ?? '□');
   }
 
@@ -22,8 +23,8 @@ export default function TuringTape({ tape, previousTape, tapePointer, ...props}:
       </CardHeader>
       <CardContent>
         {tapePart.map((tapeCell, index) => 
-          <div key={index} className={"inline"}>
-            <span className={"border inline-flex justify-center items-center w-12 h-12" + (previousTape !== undefined && tapeCell != (previousTape.get(index-2) ?? '□') ? ' text-red-700' : '') + (tapePointer+2 == index ? ' bg-amber-200' : '') }>
+          <div key={index} className={horizontal ? "inline" : ''}>
+            <span className={"border inline-flex justify-center items-center w-12 h-12" + (previousTape !== undefined && tapeCell != (previousTape.get(index-3) ?? '□') ? ' text-red-700' : '') + (tapePointer+3 == index ? ' bg-amber-200' : '') }>
               {tapeCell}
             </span>
           </div>
