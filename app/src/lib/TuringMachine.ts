@@ -133,18 +133,15 @@ class TuringMachine {
 }
 
 const tape: Tape = new Map<number, Symbol>();
-tape.set(0, 'a');
 tape.set(1, 'a');
 tape.set(2, 'a');
 tape.set(3, 'a');
 tape.set(4, 'b');
 tape.set(5, 'b');
 tape.set(6, 'b');
-tape.set(7, 'b');
+tape.set(7, 'c');
 tape.set(8, 'c');
 tape.set(9, 'c');
-tape.set(10, 'c');
-tape.set(11, 'c');
 const states: State[] = [0, 1, 2, 3, 4, 'acc', 'rej'];
 const transitionFunctions: TransitionFunction[] = [
   { stateFrom: 0, stateTo: 'acc', symbolFrom: '□', symbolTo: '□', action: 0 },
@@ -178,7 +175,7 @@ const transitionFunctions: TransitionFunction[] = [
   { stateFrom: 4, stateTo: 4,     symbolFrom: 'x', symbolTo: 'x', action: -1 },
 ];
 
-const testTuring = new TuringMachine(tape, states, 0, ['acc','rej'], transitionFunctions, ['a','b','c','x']);
+const testTuring = new TuringMachine(tape, states, 4, ['acc','rej'], transitionFunctions, ['a','b','c','x']);
 
 export default TuringMachine;
 export { testTuring, equalTransitions }

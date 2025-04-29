@@ -1,5 +1,5 @@
-import RAMachine, { Add, ConditionalJump, Halt, InstructionSet, Jump, Load, LoadFromAddress, LoadToAddress, RAMachineState } from "./RAMachine";
-import TuringMachine, { Symbol, TuringMachineState } from "./TuringMachine";
+import RAMachine, { Add, ConditionalJump, Halt, InstructionSet, Jump, Load, LoadFromAddress, LoadToAddress, RAMachineState, ReadInput, Tape, WriteOutput } from "./RAMachine";
+import TuringMachine, { Symbol, Tape as TapeTM, TuringMachineState } from "./TuringMachine";
 
 export interface TMRAMSimulationState {
   turingMachineState: TuringMachineState;
@@ -32,21 +32,39 @@ class TuringMachineRAMSimulation {
     });
 
     this.ramProgram = this.compileTMToRAMProgram(this.turingMachine);
-    const ram = new RAMachine(this.ramProgram, []);
-    ram.memory.set(2, 0);
-    for(const tapeLocation of this.turingMachine.tape) {
-      ram.memory.set(tapeLocation[0] + 3, this.encodeSymbol(tapeLocation[1]));
-    }
-
+    const inputTape = this.parseTuringTape(this.turingMachine.tape);
+    const ram = new RAMachine(this.ramProgram, inputTape);
     return ram;
   }
 
+  private parseTuringTape(tape: TapeTM): Tape {
+    const maxValue = tape.size == 0 ? 0 : Math.max(...tape.keys());
+    const newTape: Tape = Array(maxValue+1).fill(0, 0, maxValue+2);
+    newTape[maxValue+1] = -1;
+    for(const [key, value] of tape) {
+      newTape[key] = this.encodeSymbol(value);
+    }
+    return newTape;
+  }
+
   private compileTMToRAMProgram(tm: TuringMachine): InstructionSet {
+    // TODO: Verification: jednostranná páska, 
+    const tapeStartInMemory = 3;
     let program: InstructionSet = [];
 
-    program.push(new Load(0, { type: "constant", value: tm.tapePointer + 3 }));
+    // Load input to memory
+    program.push(new Load(0, { type: 'constant', value: tapeStartInMemory }));
+    program.push(new ReadInput(1, { label: 'LD' }));
+    program.push(new ConditionalJump('STA', { type: 'register', value: 1 }, '=', { type: 'constant', value: -1 }));
+    program.push(new LoadToAddress(0, { type: 'register', value: 1 }));
+    program.push(new Add(0, { type: 'register', value: 0 }, { type: 'constant', value: 1 }));
+    program.push(new Jump('LD'));
+
+    // Init variables
+    program.push(new Load(0, { type: "constant", value: tm.tapePointer + tapeStartInMemory }, { label: 'STA' } ));
     program.push(new Jump(`q${tm.initialState}`));
 
+    // Based on symbol on the tape, use specific function
     let previousState;
     const sortedFunctions = tm.transitionFunctions.sort((a,b) => String(a.stateFrom).localeCompare(String(b.stateFrom)));
     for(const func of sortedFunctions) {
@@ -58,6 +76,7 @@ class TuringMachineRAMSimulation {
       program.push(new ConditionalJump(`q${func.stateFrom}${func.symbolFrom}`, { type: "register", value: 1 }, "=", { type: "constant", value: symbolFromEnc}));
     }
 
+    // TM Functions logic
     for(const func of tm.transitionFunctions) {
       const symbolToEnc = this.encodeSymbol(func.symbolTo);
       program.push(new LoadToAddress(0, { type: "constant", value: symbolToEnc }, { label: `q${func.stateFrom}${func.symbolFrom}` }));
@@ -66,12 +85,39 @@ class TuringMachineRAMSimulation {
       }
 
       if(tm.finalStates.includes(func.stateTo)) {
-        program.push(new Halt());
+        program.push(new Jump('FIN'));
       }
       else {
         program.push(new Jump(`q${func.stateTo}`));
       }
     };
+
+    // Write memory at the end
+    program.push(new Load(0, { type: 'constant', value: tapeStartInMemory }, { label: 'FIN' }));
+    program.push(new Load(2, { type: 'constant', value: 0 }));
+    program.push(new LoadFromAddress(1, 0, { label: 'PRT' }));
+    program.push(new ConditionalJump('PR0', { type: 'register', value: 1 }, '!=', { type: 'constant', value: 0 }));
+    program.push(new ConditionalJump('END', { type: 'register', value: 2 }, '=', { type: 'constant', value: 1 }));
+    program.push(new Load(2, { type: 'constant', value: 1 }));
+    program.push(new Jump('PR1'));
+    program.push(new Load(2, { type: 'constant', value: 0 }, { label: 'PR0' }));
+    program.push(new WriteOutput({ type: 'register', value: 1 }, { label: 'PR1' }));
+    program.push(new Add(0, { type: 'register', value: 0 }, { type: 'constant', value: 1 }));
+    program.push(new Jump('PRT'));
+    program.push(new Halt({ label: 'END' }))
+    // Other way
+    /*program.push(new Load(0, { type: 'constant', value: tapeStartInMemory }, { label: 'FIN' }));
+    program.push(new Load(2, { type: 'constant', value: 0 }));
+    program.push(new LoadFromAddress(1, 0, { label: 'PRT' }));
+    program.push(new ConditionalJump('PR3', { type: 'register', value: 1 }, '!=', { type: 'constant', value: 0 }));
+    program.push(new ConditionalJump('END', { type: 'register', value: 2 }, '=', { type: 'constant', value: 1 }));
+    program.push(new Load(2, { type: 'constant', value: 0 }, { label: 'PR3' }));
+    program.push(new ConditionalJump('PR2', { type: 'register', value: 1 }, '!=', { type: 'constant', value: 0 }));
+    program.push(new Load(2, { type: 'constant', value: 1 }));
+    program.push(new WriteOutput({ type: 'register', value: 1 }, { label: 'PR2' }));
+    program.push(new Add(0, { type: 'register', value: 0 }, { type: 'constant', value: 1 }));
+    program.push(new Jump('PRT'));
+    program.push(new Halt({ label: 'END' }))*/
 
     return program;
   }
@@ -97,11 +143,12 @@ class TuringMachineRAMSimulation {
     return null;
   }
 
-  public step(): void {
+  public step(): boolean {
     if(this.ram.hasEnded()) {
-      return;
+      return false;
     }
     
+    let returnState = false;
     this.saveState();
     this.ram.step();
     if(this.ram.programUnit[this.ram.instructionPointer].options?.name == 'newInstr') {
@@ -109,15 +156,34 @@ class TuringMachineRAMSimulation {
         this.ignoreFirstNewInstr = false;
       }
       else {
+        returnState = true;
         this.turingMachine.step();
       }
     }
     if(this.ram.hasEnded()) {
+      returnState = true;
       this.turingMachine.step();
     }
 
     if(this.ram.hasEnded() != this.turingMachine.hasEnded()) {
       throw new Error(`One machine ended before another.`);
+    }
+    return returnState;
+  }
+
+  public stepTuring(): void {
+    while(!this.step()) {
+      if(this.ram.hasEnded()) {
+        return;
+      }
+    }
+  }
+
+  public backstepTuring(): void {
+    while(!this.backstep()) {
+      if(this.history.length == 0) {
+        return;
+      }
     }
   }
 
@@ -127,13 +193,17 @@ class TuringMachineRAMSimulation {
     }
   }
 
-  public backstep(): void {
+  public backstep(): boolean {
     if (this.history.length > 0) {
       const prevState = this.history.pop();
       if (prevState) {
         this.restoreState(prevState);
+        if(this.ram.programUnit[this.ram.instructionPointer].options?.name == 'newInstr' && !this.ignoreFirstNewInstr) {
+          return true;
+        }
       }
     }
+    return false;
   }
 
   public reset(): void {

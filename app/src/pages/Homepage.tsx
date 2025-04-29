@@ -47,8 +47,10 @@ function Homepage() {
       <div className="border p-10">
         <h2>Compiled Turing to RAM</h2>
         <Button onClick={() => {compiledTuring.reset(); forceUpdate(); }} className='mr-2'>Reset</Button>
+        <Button onClick={() => {compiledTuring.backstepTuring(); forceUpdate(); }} className='mr-2'>Backstep TM</Button>
         <Button onClick={() => {compiledTuring.backstep(); forceUpdate(); }} className='mr-2'>Backstep</Button>
         <Button onClick={() => {compiledTuring.step(); forceUpdate(); }} className='mr-2'>Step</Button>
+        <Button onClick={() => {compiledTuring.stepTuring(); forceUpdate(); }} className='mr-2'>Step TM</Button>
         <Button onClick={() => {compiledTuring.run(); forceUpdate(); }} className='mr-2'>Run</Button>
         <p>Aktuální stav: q<sub>{turing.currentState}</sub></p>
         <div className="flex flex-wrap">
@@ -56,9 +58,13 @@ function Homepage() {
             <TransitionFunctions funcionts={turingTBS.transitionFunctions} lastTransition={turingTBS.transitionHistory.length > 0 ? turingTBS.transitionHistory[turingTBS.transitionHistory.length-1] : undefined} />
             <TuringTape tape={turingTBS.tape} previousTape={turingTBS.getPreviousState()?.tape} tapePointer={turingTBS.tapePointer} horizontal={false} />
           </div>
-          <div className="flex flex-wrap p-5 border">
+          <div className=" p-5 border">
+            <ProgramTape name='Vstup' tape={compiledTuring.ram.input} />
+            <div className="flex flex-wrap">
             <ProgramUnit instructionSet={compiledTuring.ram.programUnit} instructionPointer={compiledTuring.ram.instructionPointer} />
             <WorkingMemoryTMSim tmrs={compiledTuring} />
+            </div>
+            <ProgramTape name='Výstup' tape={compiledTuring.ram.output} />
           </div>
         </div>
       </div>

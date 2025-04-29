@@ -380,9 +380,9 @@ class ConditionalJump implements Instruction {
 }
 
 class Halt implements Instruction {
-  label?: string;
-  constructor(label?: string) {
-    this.label = label;
+  options?: InstructionOption;
+  constructor(options?: InstructionOption) {
+    this.options = options;
   }
   execute(machine: RAMachine): void {
     machine.halt();
