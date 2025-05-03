@@ -1,5 +1,5 @@
 
-type State = number|string;
+type State = string;
 type Symbol = string;
 type Action = -1 | 0 | 1;
 type Tape = Map<number, Symbol>;
@@ -10,6 +10,14 @@ interface TransitionFunction {
   stateTo: State;
   symbolTo: Symbol;
   action: Action;
+}
+
+interface TuringMachineDefinition {
+  alphabet: Symbol[];
+  tape: Tape;
+  transitionFunctions: TransitionFunction[];
+  initialState: State;
+  finalStates: State[];
 }
 
 interface TuringMachineState {
@@ -31,9 +39,9 @@ function equalTransitions(transition1: TransitionFunction, transition2: Transiti
 
 class TuringMachine {
   tape: Tape;
+  initialTape: Tape;
   tapePointer: number = 0;
   currentState: State;
-  states: State[];
   initialState: State;
   finalStates: State[];
   transitionFunctions: TransitionFunction[];
@@ -41,16 +49,16 @@ class TuringMachine {
   private history: TuringMachineState[];
   private tapeAlphabet: Symbol[];
 
-  constructor(tape: Tape, states: State[], initialState: State, finalStates: State[], transitionFunctions: TransitionFunction[], inputAlphabet: Symbol[]) {
-    this.tape = tape;
-    this.states = states;
-    this.initialState = initialState;
-    this.finalStates = finalStates;
-    this.transitionFunctions = transitionFunctions;
+  constructor(definition: TuringMachineDefinition) {
+    this.tape = definition.tape;
+    this.initialTape = this.tape;
+    this.initialState = definition.initialState;
+    this.finalStates = definition.finalStates;
+    this.transitionFunctions = definition.transitionFunctions;
     this.history = [];
     this.transitionHistory = [];
-    this.currentState = initialState;
-    this.tapeAlphabet = ['□', ...inputAlphabet];
+    this.currentState = definition.initialState;
+    this.tapeAlphabet = definition.alphabet;
   }
 
   run(): void {
@@ -130,6 +138,16 @@ class TuringMachine {
   getTapeAlphabet() {
     return this.tapeAlphabet;
   }
+
+  getDefinition(): TuringMachineDefinition {
+    return {
+      alphabet: this.tapeAlphabet,
+      finalStates: this.finalStates,
+      initialState: this.initialState,
+      tape: this.initialTape,
+      transitionFunctions: this.transitionFunctions
+    }
+  }
 }
 
 const tape: Tape = new Map<number, Symbol>();
@@ -142,41 +160,46 @@ tape.set(6, 'b');
 tape.set(7, 'c');
 tape.set(8, 'c');
 tape.set(9, 'c');
-const states: State[] = [0, 1, 2, 3, 4, 'acc', 'rej'];
 const transitionFunctions: TransitionFunction[] = [
-  { stateFrom: 0, stateTo: 'acc', symbolFrom: '□', symbolTo: '□', action: 0 },
-  { stateFrom: 0, stateTo: 1,     symbolFrom: 'a', symbolTo: 'x', action: 1 },
-  { stateFrom: 0, stateTo: 'rej', symbolFrom: 'b', symbolTo: 'b', action: 0 },
-  { stateFrom: 0, stateTo: 'rej', symbolFrom: 'c', symbolTo: 'c', action: 0 },
-  { stateFrom: 0, stateTo: 0,     symbolFrom: 'x', symbolTo: 'x', action: 1 },
+  { stateFrom: '0', stateTo: 'acc', symbolFrom: '□', symbolTo: '□', action: 0 },
+  { stateFrom: '0', stateTo: '1',     symbolFrom: 'a', symbolTo: 'x', action: 1 },
+  { stateFrom: '0', stateTo: 'rej', symbolFrom: 'b', symbolTo: 'b', action: 0 },
+  { stateFrom: '0', stateTo: 'rej', symbolFrom: 'c', symbolTo: 'c', action: 0 },
+  { stateFrom: '0', stateTo: '0',     symbolFrom: 'x', symbolTo: 'x', action: 1 },
 
-  { stateFrom: 1, stateTo: 'rej', symbolFrom: '□', symbolTo: '□', action: 0 },
-  { stateFrom: 1, stateTo: 1,     symbolFrom: 'a', symbolTo: 'a', action: 1 },
-  { stateFrom: 1, stateTo: 2,     symbolFrom: 'b', symbolTo: 'x', action: 1 },
-  { stateFrom: 1, stateTo: 'rej', symbolFrom: 'c', symbolTo: 'c', action: 0 },
-  { stateFrom: 1, stateTo: 1,     symbolFrom: 'x', symbolTo: 'x', action: 1 },
+  { stateFrom: '1', stateTo: 'rej', symbolFrom: '□', symbolTo: '□', action: 0 },
+  { stateFrom: '1', stateTo: '1',     symbolFrom: 'a', symbolTo: 'a', action: 1 },
+  { stateFrom: '1', stateTo: '2',     symbolFrom: 'b', symbolTo: 'x', action: 1 },
+  { stateFrom: '1', stateTo: 'rej', symbolFrom: 'c', symbolTo: 'c', action: 0 },
+  { stateFrom: '1', stateTo: '1',     symbolFrom: 'x', symbolTo: 'x', action: 1 },
 
-  { stateFrom: 2, stateTo: 'rej', symbolFrom: '□', symbolTo: '□', action: 0 },
-  { stateFrom: 2, stateTo: 'rej', symbolFrom: 'a', symbolTo: 'a', action: 0 },
-  { stateFrom: 2, stateTo: 2,     symbolFrom: 'b', symbolTo: 'b', action: 1 },
-  { stateFrom: 2, stateTo: 3,     symbolFrom: 'c', symbolTo: 'x', action: 1 },
-  { stateFrom: 2, stateTo: 2,     symbolFrom: 'x', symbolTo: 'x', action: 1 },
+  { stateFrom: '2', stateTo: 'rej', symbolFrom: '□', symbolTo: '□', action: 0 },
+  { stateFrom: '2', stateTo: 'rej', symbolFrom: 'a', symbolTo: 'a', action: 0 },
+  { stateFrom: '2', stateTo: '2',     symbolFrom: 'b', symbolTo: 'b', action: 1 },
+  { stateFrom: '2', stateTo: '3',     symbolFrom: 'c', symbolTo: 'x', action: 1 },
+  { stateFrom: '2', stateTo: '2',     symbolFrom: 'x', symbolTo: 'x', action: 1 },
 
-  { stateFrom: 3, stateTo: 4,     symbolFrom: '□', symbolTo: '□', action: -1 },
-  { stateFrom: 3, stateTo: 'rej', symbolFrom: 'a', symbolTo: 'a', action: 0 },
-  { stateFrom: 3, stateTo: 'rej', symbolFrom: 'b', symbolTo: 'b', action: 0 },
-  { stateFrom: 3, stateTo: 3,     symbolFrom: 'c', symbolTo: 'c', action: 1 },
-  { stateFrom: 3, stateTo: 3,     symbolFrom: 'x', symbolTo: 'x', action: 1 },
+  { stateFrom: '3', stateTo: '4',     symbolFrom: '□', symbolTo: '□', action: -1 },
+  { stateFrom: '3', stateTo: 'rej', symbolFrom: 'a', symbolTo: 'a', action: 0 },
+  { stateFrom: '3', stateTo: 'rej', symbolFrom: 'b', symbolTo: 'b', action: 0 },
+  { stateFrom: '3', stateTo: '3',     symbolFrom: 'c', symbolTo: 'c', action: 1 },
+  { stateFrom: '3', stateTo: '3',     symbolFrom: 'x', symbolTo: 'x', action: 1 },
 
-  { stateFrom: 4, stateTo: 0,     symbolFrom: '□', symbolTo: '□', action: 1 },
-  { stateFrom: 4, stateTo: 4,     symbolFrom: 'a', symbolTo: 'a', action: -1 },
-  { stateFrom: 4, stateTo: 4,     symbolFrom: 'b', symbolTo: 'b', action: -1 },
-  { stateFrom: 4, stateTo: 4,     symbolFrom: 'c', symbolTo: 'c', action: -1 },
-  { stateFrom: 4, stateTo: 4,     symbolFrom: 'x', symbolTo: 'x', action: -1 },
+  { stateFrom: '4', stateTo: '0',     symbolFrom: '□', symbolTo: '□', action: 1 },
+  { stateFrom: '4', stateTo: '4',     symbolFrom: 'a', symbolTo: 'a', action: -1 },
+  { stateFrom: '4', stateTo: '4',     symbolFrom: 'b', symbolTo: 'b', action: -1 },
+  { stateFrom: '4', stateTo: '4',     symbolFrom: 'c', symbolTo: 'c', action: -1 },
+  { stateFrom: '4', stateTo: '4',     symbolFrom: 'x', symbolTo: 'x', action: -1 },
 ];
 
-const testTuring = new TuringMachine(tape, states, 4, ['acc','rej'], transitionFunctions, ['a','b','c','x']);
+const testTuring = new TuringMachine({
+  alphabet: ['a','b','c','x','□'],
+  finalStates: ['acc','rej'],
+  initialState: '4',
+  tape: tape,
+  transitionFunctions: transitionFunctions
+})
 
 export default TuringMachine;
 export { testTuring, equalTransitions }
-export type { State, Symbol, Action, Tape, TransitionFunction, TuringMachineState }
+export type { State, Symbol, Action, Tape, TransitionFunction, TuringMachineState, TuringMachineDefinition }

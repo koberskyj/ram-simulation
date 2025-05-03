@@ -28,7 +28,7 @@ export default function WorkingMemoryTMSim({ tmrs, ...props}: WorkingMemoryTMSim
               {memoryCell}
             </div>
             <div className={"border inline-flex justify-center items-center w-12 h-12 " + (previousMemory !== undefined && memoryCell != (previousMemory.get(index) ?? 0) ? 'text-red-700' : '') }>
-              {index > 1 ? tmrs.decodeSymbol(memoryCell) : '-'}
+              {index > 2 ? tmrs.decodeSymbol(memoryCell) : '-'}
             </div>
           </div>
         )}

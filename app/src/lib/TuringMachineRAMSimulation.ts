@@ -1,5 +1,5 @@
 import RAMachine, { Add, ConditionalJump, Halt, InstructionSet, Jump, Load, LoadFromAddress, LoadToAddress, RAMachineState, ReadInput, Tape, WriteOutput } from "./RAMachine";
-import TuringMachine, { Symbol, Tape as TapeTM, TuringMachineState } from "./TuringMachine";
+import TuringMachine, { State, Symbol, Tape as TapeTM, TuringMachineState } from "./TuringMachine";
 
 export interface TMRAMSimulationState {
   turingMachineState: TuringMachineState;
@@ -9,14 +9,14 @@ export interface TMRAMSimulationState {
 
 class TuringMachineRAMSimulation {
   ram: RAMachine;
-  private turingMachine: TuringMachine;
+  turing: TuringMachine;
   private ramProgram: InstructionSet;
   private symbolLegend: Map<Symbol, number>;
   private ignoreFirstNewInstr = true;
   private history: TMRAMSimulationState[];
 
   constructor(turingMachine: TuringMachine) {
-    this.turingMachine = turingMachine;
+    this.turing = turingMachine;
     this.symbolLegend = new Map();
     this.ramProgram = [];
     this.history = [];
@@ -27,19 +27,19 @@ class TuringMachineRAMSimulation {
     this.history = [];
     this.ignoreFirstNewInstr = true;
     this.symbolLegend.set('□', 0);
-    this.turingMachine.getTapeAlphabet().forEach((symbol, index) => {
-      this.symbolLegend.set(symbol, index);
+    this.turing.getTapeAlphabet().filter(s => s != '□')?.forEach((symbol, index) => {
+      this.symbolLegend.set(symbol, index+1);
     });
 
-    this.ramProgram = this.compileTMToRAMProgram(this.turingMachine);
-    const inputTape = this.parseTuringTape(this.turingMachine.tape);
+    this.ramProgram = this.compileTMToRAMProgram(this.turing);
+    const inputTape = this.parseTuringTape(this.turing.tape);
     const ram = new RAMachine(this.ramProgram, inputTape);
     return ram;
   }
 
   private parseTuringTape(tape: TapeTM): Tape {
     const maxValue = tape.size == 0 ? 0 : Math.max(...tape.keys());
-    const newTape: Tape = Array(maxValue+1).fill(0, 0, maxValue+2);
+    const newTape: Tape = Array(maxValue+1).fill(this.encodeSymbol('□'), 0, maxValue+2);
     newTape[maxValue+1] = -1;
     for(const [key, value] of tape) {
       newTape[key] = this.encodeSymbol(value);
@@ -83,14 +83,12 @@ class TuringMachineRAMSimulation {
       if(func.action != 0) {
         program.push(new Add(0, { type: 'register', value: 0 }, { type: 'constant', value: func.action }));
       }
-
-      if(tm.finalStates.includes(func.stateTo)) {
-        program.push(new Jump('FIN'));
-      }
-      else {
-        program.push(new Jump(`q${func.stateTo}`));
-      }
+      program.push(new Jump(`q${func.stateTo}`));
     };
+
+    for(const finalState of tm.finalStates) {
+      program.push(new Jump('FIN', { label:  `q${finalState}`}));
+    }
 
     // Write memory at the end
     program.push(new Load(0, { type: 'constant', value: tapeStartInMemory }, { label: 'FIN' }));
@@ -157,15 +155,15 @@ class TuringMachineRAMSimulation {
       }
       else {
         returnState = true;
-        this.turingMachine.step();
+        this.turing.step();
       }
     }
     if(this.ram.hasEnded()) {
       returnState = true;
-      this.turingMachine.step();
+      this.turing.step();
     }
 
-    if(this.ram.hasEnded() != this.turingMachine.hasEnded()) {
+    if(this.ram.hasEnded() != this.turing.hasEnded()) {
       throw new Error(`One machine ended before another.`);
     }
     return returnState;
@@ -208,13 +206,13 @@ class TuringMachineRAMSimulation {
 
   public reset(): void {
     this.ram.reset();
-    this.turingMachine.reset();
+    this.turing.reset();
     this.initializeRAM();
   }
 
   getState(): TMRAMSimulationState {
     const state: TMRAMSimulationState = {
-      turingMachineState: this.turingMachine.getState(),
+      turingMachineState: this.turing.getState(),
       ramState: this.ram.getState(),
       ignoreFirstNewInstr: this.ignoreFirstNewInstr
     };
@@ -228,11 +226,11 @@ class TuringMachineRAMSimulation {
   restoreState(state: TMRAMSimulationState): void {
     this.ignoreFirstNewInstr = state.ignoreFirstNewInstr;
     this.ram.restoreState(state.ramState);
-    this.turingMachine.restoreState(state.turingMachineState);
+    this.turing.restoreState(state.turingMachineState);
   }
 
   public getTuringMachineState(): TuringMachine {
-    return this.turingMachine;
+    return this.turing;
   }
 
   public getRAMState(): RAMachine {
@@ -241,6 +239,11 @@ class TuringMachineRAMSimulation {
 
   public getSymbolLegend() {
     return this.symbolLegend;
+  }
+
+  public getLastSimulatedState(): State|null {
+    // TODO
+    return null;
   }
 }
 
