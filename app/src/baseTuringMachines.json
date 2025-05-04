@@ -1,0 +1,172 @@
+[
+  {
+    "initialState": "4",
+    "alphabet": [
+      "a",
+      "b",
+      "c",
+      "x",
+      "□"
+    ],
+    "finalStates": [
+      "acc",
+      "rej"
+    ],
+    "transitionFunctions": [
+      {
+        "stateFrom": "0",
+        "stateTo": "acc",
+        "symbolFrom": "□",
+        "symbolTo": "□",
+        "action": 0
+      },
+      {
+        "stateFrom": "0",
+        "stateTo": "1",
+        "symbolFrom": "a",
+        "symbolTo": "x",
+        "action": 1
+      },
+      {
+        "stateFrom": "0",
+        "stateTo": "rej",
+        "symbolFrom": "b",
+        "symbolTo": "b",
+        "action": 0
+      },
+      {
+        "stateFrom": "0",
+        "stateTo": "rej",
+        "symbolFrom": "c",
+        "symbolTo": "c",
+        "action": 0
+      },
+      {
+        "stateFrom": "0",
+        "stateTo": "0",
+        "symbolFrom": "x",
+        "symbolTo": "x",
+        "action": 1
+      },
+      {
+        "stateFrom": "1",
+        "stateTo": "rej",
+        "symbolFrom": "□",
+        "symbolTo": "□",
+        "action": 0
+      },
+      {
+        "stateFrom": "1",
+        "stateTo": "1",
+        "symbolFrom": "a",
+        "symbolTo": "a",
+        "action": 1
+      },
+      {
+        "stateFrom": "1",
+        "stateTo": "2",
+        "symbolFrom": "b",
+        "symbolTo": "x",
+        "action": 1
+      },
+      {
+        "stateFrom": "1",
+        "stateTo": "rej",
+        "symbolFrom": "c",
+        "symbolTo": "c",
+        "action": 0
+      },
+      {
+        "stateFrom": "1",
+        "stateTo": "1",
+        "symbolFrom": "x",
+        "symbolTo": "x",
+        "action": 1
+      },
+      {
+        "stateFrom": "2",
+        "stateTo": "rej",
+        "symbolFrom": "□",
+        "symbolTo": "□",
+        "action": 0
+      },
+      {
+        "stateFrom": "2",
+        "stateTo": "rej",
+        "symbolFrom": "a",
+        "symbolTo": "a",
+        "action": 0
+      },
+      {
+        "stateFrom": "2",
+        "stateTo": "2",
+        "symbolFrom": "b",
+        "symbolTo": "b",
+        "action": 1
+      },
+      {
+        "stateFrom": "2",
+        "stateTo": "3",
+        "symbolFrom": "c",
+        "symbolTo": "x",
+        "action": 1
+      },
+      {
+        "stateFrom": "2",
+        "stateTo": "2",
+        "symbolFrom": "x",
+        "symbolTo": "x",
+        "action": 1
+      },
+      {
+        "stateFrom": "3",
+        "stateTo": "4",
+        "symbolFrom": "□",
+        "symbolTo": "□",
+        "action": -1
+      },
+      {
+        "stateFrom": "3",
+        "stateTo": "rej",
+        "symbolFrom": "a",
+        "symbolTo": "a",
+        "action": 0
+      },
+      {
+        "stateFrom": "3",
+        "stateTo": "rej",
+        "symbolFrom": "b",
+        "symbolTo": "b",
+        "action": 0
+      },
+      {
+        "stateFrom": "3",
+        "stateTo": "3",
+        "symbolFrom": "c",
+        "symbolTo": "c",
+        "action": 1
+      },
+      {
+        "stateFrom": "3",
+        "stateTo": "3",
+        "symbolFrom": "x",
+        "symbolTo": "x",
+        "action": 1
+      },
+      {
+        "stateFrom": "4",
+        "stateTo": "0",
+        "symbolFrom": "□",
+        "symbolTo": "□",
+        "action": 1
+      },
+      { "stateFrom": "4", "stateTo": "4", "symbolFrom": "a", "symbolTo": "a", "action": -1 },
+      { "stateFrom": "4", "stateTo": "4", "symbolFrom": "b", "symbolTo": "b", "action": -1 },
+      { "stateFrom": "4", "stateTo": "4", "symbolFrom": "c", "symbolTo": "c", "action": -1 },
+      { "stateFrom": "4", "stateTo": "4", "symbolFrom": "x", "symbolTo": "x", "action": -1 }
+    ],
+    "tapeArray": [ "□", "a", "a", "a", "b", "b", "b", "c", "c", "c" ],
+    "name": "Shodné délky",
+    "description": "Příklad z prezentace. Stroj přijímá slova, kde se symboly a, b i c opakují n-krát za sebou."
+  }
+]

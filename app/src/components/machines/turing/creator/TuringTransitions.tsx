@@ -71,7 +71,7 @@ export default function TuringTransitions({ value, onUpdate }: TuringCreatorType
             </div>
             <div className="py-2 pr-2">
               {value.length > 1 && (
-                <Button variant="outline" size="icon" onClick={() => removeTransition(i)}>
+                <Button className='text-red-600 hover:text-red-600 hover:bg-red-50' tabIndex={-1} variant="ghost" size="icon" onClick={() => removeTransition(i)}>
                   <Trash2 size={16} />
                 </Button>
               )}

@@ -80,7 +80,7 @@ class TuringMachine {
     if (this.history.length > 0) {
       const prevState = this.history.pop();
       if (prevState) {
-        this.restoreState(prevState);
+        this.restoreState(prevState, null);
       }
     }
   }
@@ -112,7 +112,10 @@ class TuringMachine {
     this.history.push(this.getState());
   }
 
-  restoreState(state: TuringMachineState): void {
+  restoreState(state: TuringMachineState, newHistory: TuringMachineState[]|null): void {
+    if(newHistory) {
+      this.history = newHistory;
+    }
     this.currentState = state.currentState;
     this.tape = new Map(state.tape);
     this.tapePointer = state.tapePointer;
@@ -125,8 +128,7 @@ class TuringMachine {
 
   reset(): void {
     if(this.history.length > 0) {
-      this.restoreState(this.history[0]);
-      this.history = [];
+      this.restoreState(this.history[0], []);
       this.transitionHistory = [];
     }
   }
@@ -148,6 +150,138 @@ class TuringMachine {
       transitionFunctions: this.transitionFunctions
     }
   }
+
+  getLastTransitionFunction() {
+    if(this.history.length > 0) {
+      const lastMove = this.history[this.history.length-1];
+      const func = this.transitionFunctions.find(fn => fn.stateFrom == lastMove.currentState && fn.symbolFrom == lastMove.tape.get(lastMove.tapePointer));
+      return func;
+    }
+    return null;
+  }
+}
+
+export function validateTuringMachineDefinition(machineDefinition: TuringMachineDefinition): string|true {
+  const states = extractTransitionStates(machineDefinition.transitionFunctions);
+  const tape = tapeMapToArray(machineDefinition.tape)
+
+  if(!machineDefinition.alphabet.includes('□')) {
+    return "Abeceda neobsahuje prázdný symbol (□).";
+  }
+  const alphabetDuplicates = findDuplicates(machineDefinition.alphabet);
+  if(alphabetDuplicates.length > 0) {
+    return `Abeceda obsahuje duplicitní symboly: ${alphabetDuplicates}.`;
+  }
+  const invalidSymbols = machineDefinition.alphabet.filter(symbol => symbol.length > 1);
+  if(invalidSymbols.length > 0) {
+    return `Abeceda obsahuje neplatné symboly: ${invalidSymbols}.`;
+  }
+  const invalidTapeSymbols = findInvalidSymbols(machineDefinition.alphabet, tape);
+  if(invalidTapeSymbols.length > 0) {
+    return `Páska obsahuje symboly, které nejsou z abecedy: ${invalidTapeSymbols}.`;
+  }
+  if(machineDefinition.transitionFunctions.length == 0) {
+    return `Neexistuje žádná přechodová funkce.`;
+  }
+  const transitionsMessage = validateTransitions(machineDefinition.transitionFunctions, machineDefinition.alphabet);
+  if(transitionsMessage !== null) {
+    return transitionsMessage;
+  }
+  if(machineDefinition.initialState.trim().length == 0) {
+    return `Počáteční stav není nastavený.`;
+  }
+  if(!states.includes(machineDefinition.initialState.trim())) {
+    return `Počáteční stav nemá definovanou žádnou přechodovou funkci.`;
+  }
+  if(machineDefinition.finalStates.includes(machineDefinition.initialState)) {
+    return 'Počáteční stav nesmí být zároveň koncový.';
+  }
+  if(machineDefinition.finalStates.length == 0) {
+    return `Koncové stavy nejsou nastavené.`;
+  }
+  const invalidFinalStates = findInvalidSymbols(states, machineDefinition.finalStates);
+  if(invalidFinalStates.length > 0) {
+    return `Některé stavy nemají definované žádné přechodové funkce: ${invalidFinalStates}.`;
+  }
+  return true;
+}
+
+function extractTransitionStates(transitions: TransitionFunction[]): State[] {
+  const statesSet = new Set<State>();
+
+  for (const t of transitions) {
+    statesSet.add(t.stateFrom);
+    statesSet.add(t.stateTo);
+  }
+  return Array.from(statesSet);
+}
+function findDuplicates<T>(arr: T[]) {
+  const seen = new Set<T>();
+  const duplicates = new Set<T>();
+
+  for (const item of arr) {
+    if (seen.has(item)) {
+      duplicates.add(item);
+    } else {
+      seen.add(item);
+    }
+  }
+  return Array.from(duplicates);
+}
+function findInvalidSymbols<T>(alphabet: T[],input: T[]) {
+  const alphaSet = new Set(alphabet);
+  return input.filter(symbol => !alphaSet.has(symbol));
+}
+function validateTransitions(transitions: TransitionFunction[], alphabet: string[]): string|null {
+  for(const tr of transitions) {
+    if((tr.stateFrom+"").trim() === "" || tr.stateTo.trim() === "") {
+      return `Některé stavy přechodových funkcí mají prázdný název.`;
+    }
+    if((tr.symbolFrom+"").trim() === "" || tr.symbolTo.trim() === "") {
+      return `Některé symboly přechodových funkcí jsou prázdné.`;
+    }
+  }
+  const byState = transitions.reduce<Record<string, TransitionFunction[]>>(
+    (acc, tf) => {
+      (acc[tf.stateFrom] ||= []).push(tf);
+      return acc;
+    },
+    {}
+  );
+
+  for (const state in byState) {
+    const symbols = byState[state].map((tf) => tf.symbolFrom);
+    const symbolsTo = byState[state].map((tf) => tf.symbolTo);
+
+    /*const missing = alphabet.filter((sym) => !symbols.includes(sym));
+    if (missing.length > 0) {
+      return `Chybí přechodové funkce ze stavu ${state} a symbolů ${missing}.`;
+    }*/
+
+    const invalidSymbols = findInvalidSymbols(alphabet, [...symbols, ...symbolsTo]);
+    if (invalidSymbols.length > 0) {
+      return `Přechodová funkce ${state} obsahuje symboly, které nejsou z abecedy: ${invalidSymbols}.`;
+    }
+
+    const freq: Record<string, number> = {};
+    for (const sym of symbols) {
+      freq[sym] = (freq[sym] || 0) + 1;
+    }
+    const duplicates = Object.entries(freq).filter(([, cnt]) => cnt > 1).map(([sym]) => sym);
+    if (duplicates.length > 0) {
+      return `Pro stav ${state} se opakují symboly ${duplicates}.`;
+    }
+  }
+
+  return null;
+}
+function tapeMapToArray(tape: Tape) {
+  const maxValue = tape.size == 0 ? 0 : Math.max(...tape.keys());
+  const newTape: Symbol[] = Array(maxValue+1).fill('□', 0, maxValue+1);
+  for(const [key, value] of tape) {
+    newTape[key] = value;
+  }
+  return newTape;
 }
 
 const tape: Tape = new Map<number, Symbol>();

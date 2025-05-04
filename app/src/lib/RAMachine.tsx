@@ -106,7 +106,7 @@ class RAMachine {
     if (this.history.length > 0) {
       const prevState = this.history.pop();
       if (prevState) {
-        this.restoreState(prevState);
+        this.restoreState(prevState, null);
       }
     }
   }
@@ -150,7 +150,10 @@ class RAMachine {
     this.history.push(this.getState());
   }
 
-  restoreState(state: RAMachineState): void {
+  restoreState(state: RAMachineState, newHistory: RAMachineState[]|null): void {
+    if(newHistory) {
+      this.history = newHistory;
+    }
     this.instructionPointer = state.instructionPointer;
     this.memory = new Map(state.memory);
     this.input = state.input.slice();
@@ -160,13 +163,22 @@ class RAMachine {
 
   reset(): void {
     if(this.history.length > 0) {
-      this.restoreState(this.history[0]);
-      this.history = [];
+      this.restoreState(this.history[0], []);
     }
   }
 
   getPreviousState(): RAMachineState | undefined {
     return this.history.length ? this.history[this.history.length - 1] : undefined;
+  }
+
+  getLastLabel(): string|null {
+    for(let i = this.history.length-1; i >= 0; i--) {
+      const label = this.programUnit[this.history[i].instructionPointer].options?.label;
+      if(label) {
+        return label;
+      }
+    }
+    return null;
   }
 }
 

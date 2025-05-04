@@ -79,7 +79,7 @@ class TuringMachineRAMSimulation {
     // TM Functions logic
     for(const func of tm.transitionFunctions) {
       const symbolToEnc = this.encodeSymbol(func.symbolTo);
-      program.push(new LoadToAddress(0, { type: "constant", value: symbolToEnc }, { label: `q${func.stateFrom}${func.symbolFrom}` }));
+      program.push(new LoadToAddress(0, { type: "constant", value: symbolToEnc }, { label: `q${func.stateFrom}${func.symbolFrom}`, name: 'tmState' }));
       if(func.action != 0) {
         program.push(new Add(0, { type: 'register', value: 0 }, { type: 'constant', value: func.action }));
       }
@@ -87,7 +87,7 @@ class TuringMachineRAMSimulation {
     };
 
     for(const finalState of tm.finalStates) {
-      program.push(new Jump('FIN', { label:  `q${finalState}`}));
+      program.push(new Jump('FIN', { label:  `q${finalState}`, name: 'tmState' }));
     }
 
     // Write memory at the end
@@ -195,7 +195,7 @@ class TuringMachineRAMSimulation {
     if (this.history.length > 0) {
       const prevState = this.history.pop();
       if (prevState) {
-        this.restoreState(prevState);
+        this.restoreState(prevState, null);
         if(this.ram.programUnit[this.ram.instructionPointer].options?.name == 'newInstr' && !this.ignoreFirstNewInstr) {
           return true;
         }
@@ -223,10 +223,13 @@ class TuringMachineRAMSimulation {
     this.history.push(this.getState());
   }
 
-  restoreState(state: TMRAMSimulationState): void {
+  restoreState(state: TMRAMSimulationState, newHistory: TMRAMSimulationState[]|null): void {
+    if(newHistory) {
+      this.history = newHistory;
+    }
     this.ignoreFirstNewInstr = state.ignoreFirstNewInstr;
-    this.ram.restoreState(state.ramState);
-    this.turing.restoreState(state.turingMachineState);
+    this.ram.restoreState(state.ramState, this.history.map(h => h.ramState));
+    this.turing.restoreState(state.turingMachineState, this.history.map(h => h.turingMachineState));
   }
 
   public getTuringMachineState(): TuringMachine {
@@ -242,7 +245,13 @@ class TuringMachineRAMSimulation {
   }
 
   public getLastSimulatedState(): State|null {
-    // TODO
+    for(let i = this.history.length-1; i >= 0; i--) {
+      const label = this.ram.programUnit[this.history[i].ramState.instructionPointer].options?.label;
+      const name = this.ram.programUnit[this.history[i].ramState.instructionPointer].options?.name;
+      if(label && name == 'tmState') {
+        return label;
+      }
+    }
     return null;
   }
 }
