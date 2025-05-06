@@ -1,4 +1,5 @@
 import { JSX } from "react";
+import { Machine, MachineError } from "./Machine";
 
 interface Instruction {
   options?: InstructionOption;
@@ -40,7 +41,7 @@ function operandToJSX(operand: Operand): JSX.Element {
     : <span>R<sub>{operand.value}</sub></span>;
 }
 
-class RAMachine {
+class RAMachine extends Machine {
   public programUnit: InstructionSet;
   public instructionPointer: number;
   public memory: Memory;
@@ -51,6 +52,7 @@ class RAMachine {
   private labelMap: Map<string, number>;
 
   constructor(program: InstructionSet = [], input: Tape = []) {
+    super();
     this.programUnit = program;
     this.input = input;
     this.output = [];
@@ -66,7 +68,7 @@ class RAMachine {
     this.programUnit.forEach((instr, index) => {
       if (instr.options?.label) {
         if (this.labelMap.has(instr.options.label)) {
-          throw new Error(`Duplicate label: ${instr.options.label}`);
+          throw new MachineError(`Duplicitní návěští '${instr.options.label}'`, 'RAM');
         }
         this.labelMap.set(instr.options.label, index);
       }
@@ -76,7 +78,7 @@ class RAMachine {
   public getLabelIndex(name: string): number {
     const index = this.labelMap.get(name);
     if (index === undefined) {
-      throw new Error(`Label not found: ${name}`);
+      throw new MachineError(`Návěští '${name}' nenalezeno`, 'RAM');
     }
     return index;
   }

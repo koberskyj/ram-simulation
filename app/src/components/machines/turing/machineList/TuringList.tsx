@@ -8,6 +8,7 @@ import { Check, Copy, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ButtonHover from '@/components/custom/ButtonHover';
 import TuringImport from '../creator/TuringImport';
+import { toast } from 'sonner';
 
 const baseMachines = rawMachines;
 
@@ -77,10 +78,13 @@ export default function TuringList({ onUpdate, ...props}: TuringListType) {
       setMachines(prev => [...prev, machineSave]);
       setSelectedMachineId(machines.length);
       onUpdate(machineSave);
+      toast.success('Nová definice Turingova stroje úspěšně vytvořena');
     }
     else if(editingMachineId !== null) {
       setMachines(prev => prev.map((item, idx) => idx === editingMachineId ? machineSave : item ));
       selectMachine(editingMachineId);
+      onUpdate(machineSave);
+      toast.success('Definice Turingova stroje upravena');
     }
   }
 
@@ -97,6 +101,7 @@ export default function TuringList({ onUpdate, ...props}: TuringListType) {
 
   const copyMachine = (id: number) => {
     navigator.clipboard.writeText(JSON.stringify(machines[id]));
+    toast.info(`Definice stroje ${machines[id].name.toLocaleLowerCase()} byla zkopírována do schránky`);
   }
 
   const removeMachine = (id: number) => {
@@ -106,6 +111,7 @@ export default function TuringList({ onUpdate, ...props}: TuringListType) {
     setMachines(prev => prev.filter((_, idx) => idx != id));
     selectMachine(0);
     setEditingMachineId(null);
+    toast.info(`Definice stroje ${machines[id].name.toLocaleLowerCase()} odebrána`);
   }
 
   const createNewMachine = () => {
@@ -117,6 +123,7 @@ export default function TuringList({ onUpdate, ...props}: TuringListType) {
     setShowImport(false);
     setMachines(prev => [...prev, save]);
     setSelectedMachineId(machines.length);
+    toast.success('Definice Turingova stroje úspěšně importována');
     onUpdate(save);
   }
 

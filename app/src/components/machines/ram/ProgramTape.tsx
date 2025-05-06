@@ -1,5 +1,4 @@
 import { Tape } from "@/lib/RAMachine";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type ProgramTapeType = { 
   tape: Tape,
@@ -9,19 +8,18 @@ type ProgramTapeType = {
 export default function ProgramTape({ tape, name, ...props}: ProgramTapeType) {
 
   return(
-    <Card {...props} className="w-fit">
-      <CardHeader>
-        <CardTitle>{name ?? 'Páska'}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {tape.map((cell, index) => 
-          <div key={index} className="inline" >
-            <span className="border inline-flex justify-center items-center w-12 h-12">
+    <div {...props} className="flex flex-col w-full">
+      <h3 className="font-semibold border-b mb-1 w-fit">{name}</h3>
+      <div className="relative w-full text-sm">
+        <div className="flex flex-row flex-wrap">
+          {tape.map((cell, index) => 
+            <span key={index} className="border flex justify-center items-center w-8 h-8">
               {cell}
             </span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          )}
+          {tape.length == 0 && <span className="border flex justify-center items-center px-2 h-8">Prázdný</span>}
+        </div>
+      </div>
+    </div>
   );
 }

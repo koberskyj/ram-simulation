@@ -1,5 +1,4 @@
 import { InstructionSet } from "@/lib/RAMachine";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type ProgramUnitType = { 
   instructionSet: InstructionSet,
@@ -10,12 +9,10 @@ export default function ProgramUnit({ instructionSet, instructionPointer, ...pro
 
 
   return(
-    <Card {...props} className="w-fit">
-      <CardHeader>
-        <CardTitle>Programová jednotka</CardTitle>
-      </CardHeader>
-      <CardContent className="">
-        <div className="border max-h-[80vh] overflow-y-auto">
+    <div {...props} className="flex flex-col">
+      <h3 className="font-semibold border-b mb-1 w-fit">Programová jednotka</h3>
+      <div className="relative w-full text-sm">
+        <div className="max-h-[32rem] overflow-auto pr-2 w-full text-sm">
           {instructionSet.map((instruction, index) => 
             <div key={index} className={'flex' + (index == instructionPointer ? ' text-red-700' : ' ') + (index % 2 == 0 ? ' bg-foreground/5' : ' ')}>
               <p className="w-10 text-right px-1 h-full">
@@ -30,7 +27,7 @@ export default function ProgramUnit({ instructionSet, instructionPointer, ...pro
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

@@ -1,3 +1,4 @@
+import { Machine, MachineError } from "./Machine";
 import RAMachine, { Add, ConditionalJump, Halt, InstructionSet, Jump, Load, LoadFromAddress, LoadToAddress, RAMachineState, ReadInput, Tape, WriteOutput } from "./RAMachine";
 import TuringMachine, { State, Symbol, Tape as TapeTM, TuringMachineState } from "./TuringMachine";
 
@@ -7,7 +8,7 @@ export interface TMRAMSimulationState {
   ignoreFirstNewInstr: boolean;
 }
 
-class TuringMachineRAMSimulation {
+class TuringMachineRAMSimulation extends Machine {
   ram: RAMachine;
   turing: TuringMachine;
   private ramProgram: InstructionSet;
@@ -16,6 +17,7 @@ class TuringMachineRAMSimulation {
   private history: TMRAMSimulationState[];
 
   constructor(turingMachine: TuringMachine) {
+    super();
     this.turing = turingMachine;
     this.symbolLegend = new Map();
     this.ramProgram = [];
@@ -42,13 +44,15 @@ class TuringMachineRAMSimulation {
     const newTape: Tape = Array(maxValue+1).fill(this.encodeSymbol('□'), 0, maxValue+2);
     newTape[maxValue+1] = -1;
     for(const [key, value] of tape) {
+      if(key < 0) {
+        throw new MachineError('Pro simuliaci Turingova stroje strojem RAM je potřeba, aby měl Turingův stroj jednostrannou pásku', 'TuringMachineRAMSimulation');
+      }
       newTape[key] = this.encodeSymbol(value);
     }
     return newTape;
   }
 
   private compileTMToRAMProgram(tm: TuringMachine): InstructionSet {
-    // TODO: Verification: jednostranná páska, 
     const tapeStartInMemory = 3;
     let program: InstructionSet = [];
 
@@ -69,12 +73,14 @@ class TuringMachineRAMSimulation {
     const sortedFunctions = tm.transitionFunctions.sort((a,b) => String(a.stateFrom).localeCompare(String(b.stateFrom)));
     for(const func of sortedFunctions) {
       if(func.stateFrom != previousState) {
+        program.push(new Halt());
         program.push(new LoadFromAddress(1, 0, { label: `q${func.stateFrom}`, name: 'newInstr' }));
         previousState = func.stateFrom;
       }
       const symbolFromEnc = this.encodeSymbol(func.symbolFrom);
       program.push(new ConditionalJump(`q${func.stateFrom}${func.symbolFrom}`, { type: "register", value: 1 }, "=", { type: "constant", value: symbolFromEnc}));
     }
+    program.push(new Halt());
 
     // TM Functions logic
     for(const func of tm.transitionFunctions) {
@@ -127,7 +133,7 @@ class TuringMachineRAMSimulation {
       this.symbolLegend.forEach(_ => counter++);
       this.symbolLegend.set(symbol, counter);
       return counter;*/
-      throw new Error(`Unknown symbol '${symbol}' to encode.`);
+      throw new MachineError(`Neznámý symbol '${symbol}' pro zakódování`, 'TuringMachineRAMSimulation');
     }
     return value;
   }
@@ -138,7 +144,8 @@ class TuringMachineRAMSimulation {
         return value[0];
       }
     }
-    return null;
+    throw new MachineError(`Neznámé číslo '${num}' pro dekódování`, 'TuringMachineRAMSimulation');
+    //return null;
   }
 
   public step(): boolean {
@@ -164,7 +171,7 @@ class TuringMachineRAMSimulation {
     }
 
     if(this.ram.hasEnded() != this.turing.hasEnded()) {
-      throw new Error(`One machine ended before another.`);
+      throw new MachineError(`Stroje neskončily ve stejnou chvíli`, 'TuringMachineRAMSimulation');
     }
     return returnState;
   }

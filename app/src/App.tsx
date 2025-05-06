@@ -3,6 +3,7 @@ import Homepage from '@/pages/Homepage';
 import Aboutpage from '@/pages/Aboutpage';
 import Header from '@/components/Header';
 import Footer from './components/Footer';
+import { Toaster } from 'sonner';
 
 function RouteList() {
   return (
@@ -22,7 +23,8 @@ function App() {
         <Header />
         <RouteList />
         <Footer />
-      </div>    
+      </div>
+      <Toaster richColors />
     </Router>
   );
 }

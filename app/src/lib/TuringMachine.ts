@@ -1,3 +1,4 @@
+import { Machine, MachineError } from "./Machine";
 
 type State = string;
 type Symbol = string;
@@ -37,7 +38,7 @@ function equalTransitions(transition1: TransitionFunction, transition2: Transiti
   );
 }
 
-class TuringMachine {
+class TuringMachine extends Machine {
   tape: Tape;
   initialTape: Tape;
   tapePointer: number = 0;
@@ -50,6 +51,7 @@ class TuringMachine {
   private tapeAlphabet: Symbol[];
 
   constructor(definition: TuringMachineDefinition) {
+    super();
     this.tape = definition.tape;
     this.initialTape = this.tape;
     this.initialState = definition.initialState;
@@ -85,7 +87,7 @@ class TuringMachine {
     }
   }
 
-  private processState(): TransitionFunction|null {
+  private processState(): TransitionFunction {
     for(const transitionFunction of this.transitionFunctions) {
       if(transitionFunction.stateFrom == this.currentState && transitionFunction.symbolFrom == (this.tape.get(this.tapePointer) ?? '□')) {
         this.tape.set(this.tapePointer, transitionFunction.symbolTo);
@@ -95,7 +97,7 @@ class TuringMachine {
         return transitionFunction;
       }
     }
-    return null;
+    throw new MachineError(`Nebyla nalezena žádná přechodová funkce ze stavu q${this.currentState} se symbolem ${this.tape.get(this.tapePointer) ?? '□'}`, 'Turing');
   }
 
   getState(): TuringMachineState {
