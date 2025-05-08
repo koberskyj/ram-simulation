@@ -127,3 +127,25 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* width */
+body *::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+body *::-webkit-scrollbar-track {
+  background: none; 
+}
+ 
+/* Handle */
+body *::-webkit-scrollbar-thumb {
+  background: var(--input); 
+  transition: background-color 200ms;
+  border-radius: 100px;
+}
+
+/* Handle on hover */
+body *::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground); 
+}

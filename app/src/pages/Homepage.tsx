@@ -15,6 +15,7 @@ import ButtonHover from "@/components/custom/ButtonHover";
 import { Slider } from "@/components/ui/slider";
 import { MachineError } from "@/lib/Machine";
 import { toast } from "sonner";
+import SymbolLegend from "@/components/machines/ram/SymbolLegend";
 
 function Homepage() {
   const [, setRenderTrigger] = useState(0);
@@ -190,35 +191,40 @@ function Homepage() {
                 {simulation.ram.getLastLabel() && 
                   <DivHover className="" hoverContent={"Poslední navštívené návěští v RAM stroji."}>Návěští stroje RAM: <span className="font-semibold">{simulation.ram.getLastLabel()}</span></DivHover>}
                 {simulation.getLastSimulatedState() && 
-                  <DivHover className="" hoverContent={"Poslední navštívené návěští značící stav Turingova stroje."}>Návěští Turingova stavu: <span className="font-semibold">{simulation.getLastSimulatedState()}</span></DivHover>}
+                  <DivHover className="" hoverContent={"Poslední navštívené návěští stroje RAM značící stav Turingova stroje."}>Návěští Turingova stavu: <span className="font-semibold">{simulation.getLastSimulatedState()}</span></DivHover>}
                 {simulation.turing.getLastTransitionFunction() && 
                   <DivHover className="" hoverContent={"Poslední provedená přechodová funkce Turingova stroje."}>Přechodová funkce: <span className="font-semibold"><TransitionFunction func={simulation.turing.getLastTransitionFunction()!} /></span></DivHover>}
               </div>
             </CardContent>
           </Card>
-          <div className="flex flex-wrap gap-3 flex-1 relative">
-            <Card className="grow max-h-full overflow-auto">
+          <div className="flex gap-3 flex-1 relative flex-wrap md:flex-nowrap">
+            <Card className="grow w-[49%] overflow-auto">
               <CardHeader>
                 <CardTitle>Turingův stroj</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col gap-6 justify-end">
+                <div className="flex flex-col gap-6">
                   <TuringTape tape={simulation.turing.tape} tapePointer={simulation.turing.tapePointer} />
-                  <TransitionFunctions funcionts={simulation.turing.transitionFunctions} lastTransition={simulation.turing.transitionHistory.length > 0 ? simulation.turing.transitionHistory[simulation.turing.transitionHistory.length-1] : undefined} />
+                  <div className="flex flex-col gap-6">
+                    <div className="flex justify-around">
+                      <TransitionFunctions funcionts={simulation.turing.transitionFunctions} lastTransition={simulation.turing.transitionHistory.length > 0 ? simulation.turing.transitionHistory[simulation.turing.transitionHistory.length-1] : undefined} />
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-            <Card className="grow max-h-full overflow-auto">
+            <Card className="grow min-w-[440px] w-[49%] overflow-auto">
               <CardHeader>
                 <CardTitle>Stroj RAM</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col gap-6 justify-end">
-                  {simulation.ram.output.length == 0 && <ProgramTape name='Vstup' tape={simulation.ram.input} />}
-                  {simulation.ram.output.length != 0 && <ProgramTape name='Výstup' tape={simulation.ram.output} />}
-                  <div className="flex flex-wrap gap-6">
+                <div className="flex flex-col gap-6">
+                  {simulation.ram.output.length == 0 && <ProgramTape name='Vstup' tape={simulation.ram.input} tmrs={simulation} />}
+                  {simulation.ram.output.length != 0 && <ProgramTape name='Výstup' tape={simulation.ram.output} tmrs={simulation} />}
+                  <div className="flex flex-wrap gap-6 justify-around">
                     <ProgramUnit instructionSet={simulation.ram.programUnit} instructionPointer={simulation.ram.instructionPointer} />
                     <WorkingMemoryTMSim tmrs={simulation} />
+                    <SymbolLegend legend={simulation.getSymbolLegend()} />
                   </div>
                 </div>
               </CardContent>

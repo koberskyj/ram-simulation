@@ -2,6 +2,7 @@
 
 
 import { TransitionFunction as TFType } from "@/lib/TuringMachine";
+import { ArrowRight } from "lucide-react";
 
 type TransitionFunctionType = { 
   func: TFType
@@ -10,6 +11,12 @@ type TransitionFunctionType = {
 export default function TransitionFunction({ func, ...props}: TransitionFunctionType) {
 
   return(
-    <span {...props}>δ(q<sub>{func.stateFrom}</sub>, {func.symbolFrom}) = (q<sub>{func.stateTo}</sub>, {func.symbolTo}, {func.action})</span>
+    <span {...props}>
+      <span>δ(q<sub>{func.stateFrom}</sub>, {func.symbolFrom})</span>
+      <span>
+        <ArrowRight className="inline h-4" />
+        (q<sub>{func.stateTo}</sub>, {func.symbolTo}, {func.action})
+      </span>
+    </span>
   );
 }

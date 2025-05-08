@@ -89,12 +89,16 @@ class TuringMachineRAMSimulation extends Machine {
       if(func.action != 0) {
         program.push(new Add(0, { type: 'register', value: 0 }, { type: 'constant', value: func.action }));
       }
+      if(func.action == -1) {
+        program.push(new ConditionalJump('ERR', { value: 0, type: 'register' }, '<', { value: tapeStartInMemory, type: 'constant' }));
+      }
       program.push(new Jump(`q${func.stateTo}`));
     };
 
     for(const finalState of tm.finalStates) {
       program.push(new Jump('FIN', { label:  `q${finalState}`, name: 'tmState' }));
     }
+    program.push(new Halt({ label: 'ERR' }))
 
     // Write memory at the end
     program.push(new Load(0, { type: 'constant', value: tapeStartInMemory }, { label: 'FIN' }));
@@ -138,14 +142,16 @@ class TuringMachineRAMSimulation extends Machine {
     return value;
   }
 
-  decodeSymbol(num: number): Symbol|null {
+  decodeSymbol(num: number, forceException = true): Symbol|null {
     for(const value of this.symbolLegend) {
       if(value[1] == num) {
         return value[0];
       }
     }
-    throw new MachineError(`Neznámé číslo '${num}' pro dekódování`, 'TuringMachineRAMSimulation');
-    //return null;
+    if(forceException) {
+      throw new MachineError(`Neznámé číslo '${num}' pro dekódování`, 'TuringMachineRAMSimulation');
+    }
+    return null;
   }
 
   public step(): boolean {

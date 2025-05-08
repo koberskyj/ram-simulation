@@ -4,11 +4,25 @@ import { Symbol, Tape } from "@/lib/TuringMachine";
 type TuringTapeProps = {
   tape: Tape;
   tapePointer: number;
+  onTapePointerChange?: (newPointer: number) => void;
 } & React.ComponentProps<"div">;
 
-export default function TuringTape({ tape, tapePointer, ...props }: TuringTapeProps) {
+export default function TuringTape({ tape, tapePointer, onTapePointerChange, ...props }: TuringTapeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+
+  const [lastChangedPos, setLastChangedPos] = useState<number | null>(null);
+  const prevPointerRef = useRef<number>(tapePointer);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartX, setDragStartX] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
+
+  useEffect(() => {
+    if (prevPointerRef.current !== tapePointer) {
+      setLastChangedPos(null);
+    }
+    prevPointerRef.current = tapePointer;
+  }, [tapePointer]);
 
   useLayoutEffect(() => {
     if(!containerRef.current) {
@@ -30,7 +44,7 @@ export default function TuringTape({ tape, tapePointer, ...props }: TuringTapePr
   const half = Math.floor(visibleCount / 2);
   const margin = 2;
 
-  const desiredLeft  = tapePointer - half - margin;
+  const desiredLeft = tapePointer - half - margin;
   const desiredRight = tapePointer + half + margin;
 
   const [startIndex, setStartIndex] = useState(desiredLeft);
@@ -67,11 +81,12 @@ export default function TuringTape({ tape, tapePointer, ...props }: TuringTapePr
 
     const lengthChanged = newWindow.length !== windowTape.length;
     let contentChanged = false;
+    let changedIdx = -1;
     if(!lengthChanged) {
       for(let i = 0; i < newWindow.length; i++) {
         if(newWindow[i] !== windowTape[i]) {
           contentChanged = true;
-          break;
+          changedIdx = i;
         }
       }
     }
@@ -79,22 +94,57 @@ export default function TuringTape({ tape, tapePointer, ...props }: TuringTapePr
     if (newStart !== startIndex || lengthChanged || contentChanged) {
       setStartIndex(newStart);
       setWindowTape(newWindow);
+      if (contentChanged && changedIdx >= 0) {
+        setLastChangedPos(newStart + changedIdx);
+      }
     }
   }, [ tapePointer, tape, desiredLeft, desiredRight, startIndex, windowTape ]);
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    setDragStartX(e.clientX);
+  };
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if(!isDragging) {
+      return;
+    }
+    setDragOffset(e.clientX - dragStartX);
+  };
+  const handleMouseUp = () => {
+    if(!isDragging) {
+      return;
+    }
+    setIsDragging(false);
+    const deltaCells = -Math.round(dragOffset / cellSizePx);
+    if(deltaCells !== 0 && onTapePointerChange) {
+      onTapePointerChange(tapePointer + deltaCells);
+    }
+    setDragOffset(0);
+  };
+
   const pointerIndex = tapePointer - startIndex;
-  const translate = (containerSize.width - cellSizePx) / 2 - pointerIndex * cellSizePx;
+  const baseTranslate = (containerSize.width - cellSizePx) / 2 - pointerIndex * cellSizePx;
+  const totalTranslate = baseTranslate + dragOffset;
 
   return (
-    <div {...props} className="flex flex-col w-full flex-1">
-      <h3 className="font-semibold border-b mb-1 w-fit">Páska</h3>
-      <div ref={containerRef} className="relative overflow-hidden w-full h-8">
-        <div className="absolute flex transition-transform duration-300 flex-row" style={{ transform: `translateX(${translate}px)` }}>
-          {windowTape.map((cell, idx) => (
-            <span key={idx} className={`border inline-flex justify-center items-center w-8 h-8 ${idx === pointerIndex ? 'bg-primary/30 font-semibold' : ''}`}>
-              {cell}
-            </span>
-          ))}
+    <div {...props}>
+      <h3 className="font-semibold w-fit">Páska</h3>
+      <div ref={containerRef} className="relative overflow-hidden w-full h-8 cursor-grab" 
+        onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+        <div className={`absolute flex flex-row ${!isDragging ? 'transition-transform duration-300' : ''}`} 
+          style={{ transform: `translateX(${totalTranslate}px)` }}>
+          {windowTape.map((cell, idx) => {
+            const absIndex = startIndex + idx;
+            const isPointer = idx === pointerIndex;
+            const isLastChanged = absIndex === lastChangedPos;
+            return (
+              <span key={idx} className={`border inline-flex justify-center items-center w-8 h-8
+                  ${isPointer ? 'bg-primary/30 font-semibold' : ''} ${isLastChanged ? '' : ''}`}>
+                {cell}
+              </span>
+            );
+          })}
         </div>
       </div>
     </div>
