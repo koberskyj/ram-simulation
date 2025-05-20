@@ -17,12 +17,10 @@ export default function TuringTape({ tape, tapePointer, onTapePointerChange, ...
   const [dragStartX, setDragStartX] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
 
-  useEffect(() => {
-    if (prevPointerRef.current !== tapePointer) {
-      setLastChangedPos(null);
-    }
-    prevPointerRef.current = tapePointer;
-  }, [tapePointer]);
+  if (prevPointerRef.current !== tapePointer) {
+    setLastChangedPos(null);
+  }
+  prevPointerRef.current = tapePointer;
 
   useLayoutEffect(() => {
     if(!containerRef.current) {
@@ -53,52 +51,50 @@ export default function TuringTape({ tape, tapePointer, onTapePointerChange, ...
     return Array.from({ length }, (_, i) => tape.get(desiredLeft + i) ?? '□');
   });
 
-  useEffect(() => {
-    let newStart = startIndex;
-    let newWindow = [...windowTape];
+  let newStart = startIndex;
+  let newWindow = [...windowTape];
 
-    if(newStart > desiredLeft) {
-      const leftCells: Symbol[] = [];
-      for(let i = desiredLeft; i < newStart; i++) {
-        leftCells.push(tape.get(i) ?? '□');
-      }
-      newWindow = [...leftCells, ...newWindow];
-      newStart = desiredLeft;
+  if(newStart > desiredLeft) {
+    const leftCells: Symbol[] = [];
+    for(let i = desiredLeft; i < newStart; i++) {
+      leftCells.push(tape.get(i) ?? '□');
     }
+    newWindow = [...leftCells, ...newWindow];
+    newStart = desiredLeft;
+  }
 
-    const currentEnd = newStart + newWindow.length - 1;
-    if(currentEnd < desiredRight) {
-      const rightCells: Symbol[] = [];
-      for(let i = currentEnd + 1; i <= desiredRight; i++) {
-        rightCells.push(tape.get(i) ?? '□');
-      }
-      newWindow = [...newWindow, ...rightCells];
+  const currentEnd = newStart + newWindow.length - 1;
+  if(currentEnd < desiredRight) {
+    const rightCells: Symbol[] = [];
+    for(let i = currentEnd + 1; i <= desiredRight; i++) {
+      rightCells.push(tape.get(i) ?? '□');
     }
+    newWindow = [...newWindow, ...rightCells];
+  }
 
-    newWindow = newWindow.map((_, idx) =>
-      tape.get(newStart + idx) ?? '□'
-    );
+  newWindow = newWindow.map((_, idx) =>
+    tape.get(newStart + idx) ?? '□'
+  );
 
-    const lengthChanged = newWindow.length !== windowTape.length;
-    let contentChanged = false;
-    let changedIdx = -1;
-    if(!lengthChanged) {
-      for(let i = 0; i < newWindow.length; i++) {
-        if(newWindow[i] !== windowTape[i]) {
-          contentChanged = true;
-          changedIdx = i;
-        }
+  const lengthChanged = newWindow.length !== windowTape.length;
+  let contentChanged = false;
+  let changedIdx = -1;
+  if(!lengthChanged) {
+    for(let i = 0; i < newWindow.length; i++) {
+      if(newWindow[i] !== windowTape[i]) {
+        contentChanged = true;
+        changedIdx = i;
       }
     }
+  }
 
-    if (newStart !== startIndex || lengthChanged || contentChanged) {
-      setStartIndex(newStart);
-      setWindowTape(newWindow);
-      if (contentChanged && changedIdx >= 0) {
-        setLastChangedPos(newStart + changedIdx);
-      }
+  if (newStart !== startIndex || lengthChanged || contentChanged) {
+    setStartIndex(newStart);
+    setWindowTape(newWindow);
+    if (contentChanged && changedIdx >= 0) {
+      setLastChangedPos(newStart + changedIdx);
     }
-  }, [ tapePointer, tape, desiredLeft, desiredRight, startIndex, windowTape ]);
+  }
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();

@@ -32,7 +32,7 @@ export default function TuringCreator({ onUpdate, definition, name, description,
     const finalStates = finalStatesInput.split(',').map(s => s.trim()).filter(s => s.length > 0);
 
     if(nameInput.length < 3) {
-      setErrorMessage("Název stroje musí být delší než 2 znaky.");
+      setErrorMessage("Název stroje musí být delší než 2 znaky. Ten lze upravit v záložce \"Upravit název a popisek stroje\".");
       return;
     }
     if(initialState[0] != 'q') {
@@ -45,11 +45,11 @@ export default function TuringCreator({ onUpdate, definition, name, description,
     }
     for(const tr of transitions) {
       if(tr.stateFrom[0] != 'q') {
-        setErrorMessage(`Stav '${tr.stateFrom}' přechodové funkce nezačíná předponou 'q'.`);
+        setErrorMessage(`Stav přechodové funkce '${tr.stateFrom}' nezačíná předponou 'q'.`);
         return;
       }
       if(tr.stateTo[0] != 'q') {
-        setErrorMessage(`Stav '${tr.stateTo}' přechodové funkce nezačíná předponou 'q'.`);
+        setErrorMessage(`Stav přechodové funkce '${tr.stateTo}' nezačíná předponou 'q'.`);
         return;
       }
     }
@@ -132,7 +132,7 @@ export default function TuringCreator({ onUpdate, definition, name, description,
       </div>
       <div className="flex justify-between items-end gap-2 pt-6">
         <Button onClick={createTuring}>Uložit</Button>
-        {errorMessage.length > 0 ? <Alert variant="destructive" className="p-2 w-fit font-semibold bg-destructive/18"><AlertCircle className="h-4 w-4" /><AlertDescription>{errorMessage}</AlertDescription></Alert> : ""}
+        {errorMessage.length > 0 ? <Alert variant="destructive" className="p-2 w-fit font-semibold bg-destructive/18 max-w-96"><AlertCircle className="h-4 w-4" /><AlertDescription>{errorMessage}</AlertDescription></Alert> : ""}
       </div>
     </div>
   );

@@ -9,7 +9,7 @@ export default function WorkingMemoryTMSim({ tmrs, ...props}: WorkingMemoryTMSim
   const previousMemory = tmrs.ram.getPreviousState()?.memory;
   const memoryPart: number[] = [];
   const maxMemoryLoc = tmrs.ram.memory.size == 0 ? 0 : Math.max(...tmrs.ram.memory.keys());
-  const maxVisibleLoc = maxMemoryLoc > 3 ? maxMemoryLoc+2 : 3;
+  const maxVisibleLoc = maxMemoryLoc >= 3 ? maxMemoryLoc+2 : 3;
   for(let i=0; i < maxVisibleLoc; i++) {
     memoryPart.push(tmrs.ram.memory.get(i) ?? 0);
   }

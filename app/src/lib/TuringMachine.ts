@@ -183,14 +183,14 @@ export function validateTuringMachineDefinition(machineDefinition: TuringMachine
     return `Páska obsahuje symboly, které nejsou z abecedy: ${invalidTapeSymbols}.`;
   }
   if(machineDefinition.transitionFunctions.length == 0) {
-    return `Neexistuje žádná přechodová funkce.`;
+    return `Není definována žádná přechodová funkce.`;
   }
   const transitionsMessage = validateTransitions(machineDefinition.transitionFunctions, machineDefinition.alphabet);
   if(transitionsMessage !== null) {
     return transitionsMessage;
   }
   if(machineDefinition.initialState.trim().length == 0) {
-    return `Počáteční stav není nastavený.`;
+    return `Počáteční stav není nastaven.`;
   }
   if(!states.includes(machineDefinition.initialState.trim())) {
     return `Počáteční stav nemá definovanou žádnou přechodovou funkci.`;
@@ -199,11 +199,11 @@ export function validateTuringMachineDefinition(machineDefinition: TuringMachine
     return 'Počáteční stav nesmí být zároveň koncový.';
   }
   if(machineDefinition.finalStates.length == 0) {
-    return `Koncové stavy nejsou nastavené.`;
+    return `Nejsou nastaveny koncové stavy.`;
   }
   const invalidFinalStates = findInvalidSymbols(states, machineDefinition.finalStates);
   if(invalidFinalStates.length > 0) {
-    return `Některé stavy nemají definované žádné přechodové funkce: ${invalidFinalStates}.`;
+    return `Stavy ${invalidFinalStates.map(s => 'q'+s)} nemají definované žádné přechodové funkce.`;
   }
   return true;
 }
@@ -262,7 +262,7 @@ function validateTransitions(transitions: TransitionFunction[], alphabet: string
 
     const invalidSymbols = findInvalidSymbols(alphabet, [...symbols, ...symbolsTo]);
     if (invalidSymbols.length > 0) {
-      return `Přechodová funkce ${state} obsahuje symboly, které nejsou z abecedy: ${invalidSymbols}.`;
+      return `Přechodová funkce začínající ve stavu q${state} obsahuje symboly, které nejsou z abecedy: ${invalidSymbols}.`;
     }
 
     const freq: Record<string, number> = {};
@@ -271,7 +271,7 @@ function validateTransitions(transitions: TransitionFunction[], alphabet: string
     }
     const duplicates = Object.entries(freq).filter(([, cnt]) => cnt > 1).map(([sym]) => sym);
     if (duplicates.length > 0) {
-      return `Pro stav ${state} se opakují symboly ${duplicates}.`;
+      return `Pro stav q${state} se opakují symboly ${duplicates} v přechodových funkcích.`;
     }
   }
 
