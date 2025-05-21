@@ -5,6 +5,7 @@
 \usepackage[backend=biber, style=iso-numeric, alldates=iso]{biblatex} % bibliografie
 \usepackage{dcolumn} % sloupce tabulky s ciselnymi hodnotami
 \usepackage{subfig} % makra pro "podobrazky" a "podtabulky"
+\usepackage{amssymb} % \square a \box
 \usepackage[cpp]{diplomalst}
 
 % Zadame pozadovane vstupy pro generovani titulnich stran.
@@ -31,11 +32,8 @@
 
 % \EnglishKeywords{typography; \LaTeX; master thesis}
 
-\AddAcronym{DVD}{Digital Versatile Disc}
-\AddAcronym{TNT}{Trinitrotoluen}
-\AddAcronym{UML}{Unified Modeling Language}
-\AddAcronym{HTML}{Hyper Text Markup Language}
-\AddAcronym{TUG}{\TeX{} Users Group}
+\AddAcronym{RAM}{Random Access Machine}
+\AddAcronym{IP}{Instruction Pointer, ukazatel na právě rováděnou instrukci}
 
 \addbibresource{biblatex-examples.bib}
 
@@ -63,6 +61,7 @@
 \input{Chapters/Introduction.tex}
 \input{Chapters/SampleChapter1.tex}
 \input{Chapters/SampleChapter2.tex}
+\input{Chapters/SampleChapter3.tex}
 \input{Chapters/TechnicalDetails.tex}
 \input{Chapters/Conclusion.tex}
 

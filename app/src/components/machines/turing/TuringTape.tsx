@@ -1,4 +1,4 @@
-import React, { useRef, useState, useLayoutEffect, useEffect } from 'react';
+import React, { useRef, useState, useLayoutEffect } from 'react';
 import { Symbol, Tape } from "@/lib/TuringMachine";
 
 type TuringTapeProps = {
