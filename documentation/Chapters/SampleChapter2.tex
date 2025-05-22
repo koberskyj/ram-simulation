@@ -1,5 +1,55 @@
 \chapter{Použité technologie}
+\label{sec:technologies}
+V této kapitole jsou popsány základní technologie a jejich balíčky, které jsou v této práci použity.
 
-\section{React.js}
+\section{JSON}
+Jedná se o standardní formát textu, přes který lze reprezentovat strukturovaná data. 
+Výhodou oproti binárnímu kódu či standardnímu textového souboru je čitelnost, 
+kdy jsou definovaná jasná pravidla formátu, který je snadno čitelný jak pro uživatele, tak počítače.
+Tento formát je založen na základně syntaxe JavaScript (JS) objektů a slouží především pro ukládání dat a komunikaci mezi zařízeními \cite{bray_json}.
+
+\section{TypeScript}
+TypeScript je o open-source jazyk vyvinutý firmou Microsoft, který především rozšiřuje JS syntaxi o typy a jejich kontrolu.
+Zdrojový kód se nejprve přeloží (transpiluje) do JS kódu, který lze následne spustit ve webovém prohlížeči (nebo na serveru přes například Node.js). 
+Mezi hlavní přednosti tohoto jazyka patří zejména dřívější odhalení chyb díky typové kontrole a našeptávání během psaní kódu \cite{w3schools_typescript}.
+
+\section{Webové technologie}
+Webová stránka v dnešní době již není většinou skládaná pouze z HTML a CSS, 
+mnohé stránky se neobejdou bez různé interaktivity pomocí jazyka JavaScript, případně WebAssembly.
+Stránka pak může díky této interaktivity komunitovat přímo s lokálním počítačem či internetem, 
+může provádět různé dynamické upravy v DOM (Document Object Model) a slouží i ke zprostředkování složitějších animací.
+
+\subsection{Použité API a knihovny}
+Pro zjednodušení práce a přidání možnosti ukládání dat byly použity tyto webové technologie:
+\begin{itemize}
+  \item \textbf{localStorage}, sloužící pro lokální dlouhodobé uložení dat ve formátu klíč-hodnota, která je formátu JSON \cite{mozilla_localstorage}.
+  \item \textbf{Shadcn}, pro již předpřipravené komponenty, jako jsou například tlačítka, ikonky a vyskakovací okna. Samotná knihovna využívá Radix UI a Lucide ikonky \cite{shadcn_introduction}.
+  \item \textbf{Tailwind CSS}, který slouží pro jednoduché stylování přímo přes třídy na jednotlivých HTML elementech nebo jejich ekvivalentních prvků \cite{tailwindcss}.
+\end{itemize}
+
+\subsection{React.js}
+Samotná aplikace je napsána za pomocí frameworku React.js, který výrazně zjednodušuje zejména interaktivitu aplikace a rozděluje kód do jednotivých komponent. 
+
+React.js slouží ke tvorbě webových uživatelských rozhraní v JS nebo, v tomto případě, v jazyce TypeScript.
+Hlavní myšlenkou knihovny je deklarativní a komponentový přístup - rozhraní se skládá z malých, znovupoužitelných kompopent, 
+které popisují, jak má aplikace vypadat pro konkrétní stav dat. 
+HTML elementy komponent a i celkově jednotlivé kompomenty jsou v tomto případě reprezentovány ekvivalentní strukturou JSX/TSX s minimálními změnami.
+Díky této myšlence lze snadno vytvářet komplexní UI prvky, které jsou na pozadí složeny z menších a menších prvků.
+React kód je převážně spouštěn na straně uživatele v prohlížeči, 
+avšak existují i alternativy v podobě mobilních aplikací přes React Native nebo kódů pro server přes Next.js.
+Při změně jednotlivých komponent React efektivně aktualizuje pouze dotčené části DOM (Document Object Model) 
+pomocí své vlastní implementace zvané \enquote{virtual DOM} \cite{mozilla_react}.
 
 \section{Git}
+Jedná se o jeden z nejrozšířenějších verzovacích systémů, který výrazně usnadňuje práci v týmu, řešení záloh evidenci jednotlivých změn.
+Data mohou přes něj mohou být uložena jak lokálně, tak i na serveru \cite{git}.
+V této práci byl použit server \textbf{GitHub}, který umožňuje správu privátních i věřejných projektů, 
+obsahuje uživatelky přívětivé rozhraní a má i několik dodatečných funkcí navíc, jako jsou například GitHub pages \cite{github}.
+
+V této práci je použit verzovací systém zejména kvůli tomu, aby měl vedoucí práce vždy k dispozici aktuální verzi projektu, včetně historie aktivity. 
+Aplikace je také zveřejněna na již zmíněném GitHub Pages, jelikož je tato funkce zdarma a odpadá tak nutnost řešit hosting na jiných službách.
+
+\subsection{GitHub Pages}
+GitHub Pages slouží pro automatické publikování webových stránek s předpřipravenými či vlastními URL \cite{githubpages}. 
+Vzhledem k použití frameworku je však nutné aplikaci nejdříve sestavit, a pak až následně publikovat. 
+Aplikace se publikuje do vlastní větve v repozitáři projektu, takže nemusí být součástí zdrojových kódů.

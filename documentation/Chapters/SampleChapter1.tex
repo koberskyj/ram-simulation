@@ -4,17 +4,16 @@
 \section{Turingův stroj}
 Jedná se o idealizovaný model počítače, který lze použít ke zkoumání hranic algoritmicky řešitelných úloh. 
 Stroj popsal v roce 1936 Alan Turing a od té doby je to jeden z klíčových formálních nástrojů pro
- definici pojmu \texttt{algoritmus} a pro charakterizaci rekurzivně vyčíslitelných jazyků. % TODO cite https://www.geeksforgeeks.org/turing-machine-in-toc/
+ definici pojmu \texttt{algoritmus} a pro charakterizaci rekurzivně vyčíslitelných jazyků \cite{geeksforgeeks_turing}.
 Je na něm postavena \textbf{Churchova-Turingova teze}, podle které může být každý algoritmus realizován Turingovým strojem. 
-Programovací jazyky a stroje, které umožňují vyjádřit libovolný takovýto algoritmus, se označují jako \textbf{Turingovsky úplné}. % TODO https://www.cs.vsb.cz/sawa/ti/slides/ti-slides-01.pdf
-Existuje řada variant Turingova stroje, všechny však sdílí 3 základní prvky v podobě nekonečné pásky, čtecí/zapisovací hlavy a množiny přechodových funkcí.
+Programovací jazyky a stroje, které umožňují vyjádřit libovolný takovýto algoritmus, se označují jako \textbf{Turingovsky úplné} \cite{sawa_teoreticka}.
 
-Existuje několik různých variant Turingova stroje, všechny ale obsahují nějakou verzi nekonečné pásky, čtecí hlavu a přepisovací pravidla.
+Existuje několik různých variant Turingova stroje, všechny ale obsahují nějakou verzi \textit{nekonečné pásky}, \textit{čtecí hlavu} a \textit{přepisovací pravidla}.
 V této práci je Turingův stroj implementován s oboustranně nekonečnou páskou, samotná simulace je však limitována na stroj s jednostranně nekonečnou páskou. 
 Více je konkrétní implementace popsána v kapitole \ref{sec:machine_impl}.
 
 \subsection{Definice stroje}
-Formálně je Turingův stroj definován jako šestice $M = (Q, \Sigma, \Gamma, \delta, q_0, F)$, kde: % TODO https://www.cs.vsb.cz/sawa/ti/slides/ti-slides-01.pdf
+Formálně je Turingův stroj definován jako šestice $M = (Q, \Sigma, \Gamma, \delta, q_0, F)$, kde \cite{sawa_teoreticka}: 
 \begin{itemize}
 	\item $Q$ je konečná neprázdná množina stavů,
 	\item $\Gamma$ je konečná neprázdná množina páskových symbolů,
@@ -23,7 +22,7 @@ Formálně je Turingův stroj definován jako šestice $M = (Q, \Sigma, \Gamma, 
 	\item $q_0 \in Q$ je počáteční stav,
 	\item $F \subseteq Q$ je množina koncových stavů.
 \end{itemize}
-V $\Gamma - \Sigma$ je vždy speciální znak $\square$ označuje prázdný znak (blank).
+Výsledek rozdílu $\Gamma - \Sigma$ je vždy speciální znak $\square$, který označuje prázdný znak (blank).
 
 \subsection{Příklady Turingových strojů}
 % Lze pak doplnit o výpočet a konfiguraci
@@ -42,8 +41,7 @@ Skládá se z \emph{programové jednotky} (sekvence instrukcí), \emph{pracovní
 Buňky paměti i pásky obsahují pouze celá čísla ($\mathbb{N}$), nelze do nich tedy uložit znak. 
 Pracovní paměť slouží pro vstup i výstup a je indexována od $0$ $(R_0)$ do $n$ $(R_n)$. Vstupní páska slouží pouze pro čtení a naopak výstupní pouze pro zápis.
 Stejně jako u Turingova stroje existuje i zde řada modifikovaných definic RAM stroje.
-Stroj navíc obsahuje ukazatel na právě prováděnou instrukci v programové jednotce (IP). Stroj v základu obsahuje tyto instrukce:
-% TODO https://www.cs.vsb.cz/sawa/ti/slides/ti-slides-01.pdf
+Stroj navíc obsahuje ukazatel na právě prováděnou instrukci v programové jednotce (IP) a v základu obsahuje tyto instrukce \cite{sawa_teoreticka}:
 \begin{itemize}
 	\item $R_i := c$
 	\item $R_i := R_j$
@@ -66,12 +64,12 @@ co by nám ke každému znaku přiřadil číselnou hodnotu. Například tímto 
   \Sigma \;\longrightarrow\; \mathbb{N},\qquad 
   a_1 \rightarrow 1,\; a_2 \rightarrow 2,\;\dots,\; a_n \rightarrow n
 \]
-Hodnota 0 bude rezervována pro znak $\square$, aby z počátku nulová (nezapsaná) buňka RAM paměti odpovídala prázdnému symbolu na pásce.
+Hodnota 0 je rezervována pro znak $\square$, aby z počátku nulová (nezapsaná) buňka paměti RAM odpovídala prázdnému symbolu na pásce.
 Samotný program stroje RAM lze tvořit následujícím způsobem:
 \begin{enumerate}
 	\item Program začne skokem na aktuální stav.
 	\item Pro každý stav definuj návěští, které si načte aktuální symbol na pásce. 
-		Poté následuje série skoků, které \enquote{rozřadí} běh programu do konkrétních stavů s daným symbol.
+		Poté následuje série skoků, které \enquote{rozřadí} běh programu do konkrétních stavů s daným symbolem.
 	\item Pro každý stav s konkrétním symbolem definuj návěští. Aktualizuj symbol na pozici čtecí hlavy podle přepisovacího pravidla přechodové funkce a vykonej posun ($\{-1, 0, +1\}$). 
 		Pokud je nový stav koncový - konec programu (\texttt{halt}), jinak skoč na tento nový stav (zpět krok 2).
 \end{enumerate}

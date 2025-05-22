@@ -48,7 +48,7 @@ class RAMachine extends Machine {
   public input: Tape;
   public output: Tape;
   public halted: boolean;
-  private history: RAMachineState[];
+  history: RAMachineState[];
   private labelMap: Map<string, number>;
 
   constructor(program: InstructionSet = [], input: Tape = []) {

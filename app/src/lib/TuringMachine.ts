@@ -47,7 +47,7 @@ class TuringMachine extends Machine {
   finalStates: State[];
   transitionFunctions: TransitionFunction[];
   transitionHistory: TransitionFunction[];
-  private history: TuringMachineState[];
+  history: TuringMachineState[];
   private tapeAlphabet: Symbol[];
 
   constructor(definition: TuringMachineDefinition) {
