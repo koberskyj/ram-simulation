@@ -199,8 +199,13 @@ class TuringMachineRAMSimulation extends Machine {
   }
 
   public run(): void {
-    while (!this.ram.hasEnded()) {
+    let run = 0;
+    while(!this.ram.hasEnded()) {
+      if(run >= 2000) {
+        throw new MachineError(`Překročen maximální počet kroků`, 'TuringMachineRAMSimulation');
+      }
       this.step();
+      run++;
     }
   }
 

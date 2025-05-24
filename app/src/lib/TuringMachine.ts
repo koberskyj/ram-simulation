@@ -64,8 +64,13 @@ class TuringMachine extends Machine {
   }
 
   run(): void {
+    let run = 0;
     while(!this.hasEnded()) {
+      if(run >= 2000) {
+        throw new MachineError(`Překročen maximální počet kroků`, 'Turing');
+      }
       this.step();
+      run++;
     }
   }
 
