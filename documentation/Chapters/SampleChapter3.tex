@@ -5,10 +5,10 @@ Samotná aplikace je psána celá v jednom React.js projektu a obsahuje již zm�
 
 \section{Implementace strojů}
 \label{sec:machine_impl}
-Aplikace obsahuje dohromady tři stroje, kdy samotná simulace je brána jako samostatný stroj. 
+Aplikace obsahuje dohromady tři stroje, ze kterých je samotná simulace brána jako samostatný stroj. 
 Zbylé dva stroje jsou tedy Turingův stroj a RAM stroj.
 
-Všechny stroje jsou reprezentovany ve formě třídy a dědí třídu \texttt{Machine}, která definuje různé sjednocené operace
+Všechny stroje jsou reprezentovány třídou, která dědí ze třídy \texttt{Machine}. Ta definuje různé sjednocené operace
 pro všechny stroje, jako je například funkce \texttt{reset}, \texttt{backstep} a nebo \texttt{restoreState}. 
 Všechny stroje si evidují historii kroků z důvodu jednoduchého krokování zpět. 
 Toto chování však není vynucené třídou \texttt{Machine}, ta pouze vyžaduje, aby všechny stroje podporovaly nějakou formu krokování.
@@ -31,9 +31,9 @@ Třída obsahuje navíc informaci o tom, jaký stroj danou chybu vyhodil.
 To je výhoda například pro stroj simulace, kde pak můžeme zjistit přímo ve kterém konkrétním stroji chyba nastala.
 
 Třída RAM stroje navíc obsahuje jednoduché rozhraní pro komunikaci s pamětí a páskou, díky kterému je pak požné definovat jednotlivé instrukce.
-Všechny tyto instrukce implementují z rozhraní \texttt{Instruction}. Příklad implementace instrukce \texttt{WriteOutput} je zobrazen v kódě \ref{src:instructionExample}.
+Všechny tyto instrukce implementují rozhraní \texttt{Instruction}. Příklad implementace jedné takové instrukce, \texttt{WriteOutput}, je zobrazen v kódě \ref{src:instructionExample}.
 Každá instrukce má také parametr \texttt{options}, díky kterému můžeme přiřadit instrukci návěští nebo popisek, 
-přes který lze nastavit různé \enquote{body synchronizace}, které se využívají například při simulaci popsané v další sekci.
+přes který lze nastavit různé \enquote{body synchronizace}, které se využívají například při simulaci, popsané v další sekci.
 
 \begin{figure}[h!]
 	\begin{lstlisting}[label=src:instructionExample,caption={Ukázka kódu instrukce \texttt{WriteOutput}}]
