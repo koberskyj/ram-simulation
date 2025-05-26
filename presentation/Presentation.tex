@@ -5,9 +5,9 @@
 
 \title[Simulace Turingova stroje strojem RAM]{Simulace Turingova stroje strojem RAM}
 % \subtitle{Simulace Turingova stroje RAMem}
-\author{Bc. Jakub Koběrský}
+\author{Jakub Koběrský}
 % \institute[VŠB-TUO]{VŠB -- Technická univerzita Ostrava\\\vspace{2mm}jmeno.prijmeni@vsb.cz}
-\date[15.~3.~2025]{15.~března 2025}
+\date[15.~3.~2025]{květen 2025\\Vedoucí: Ing. Martin Kot, Ph.D.}
 
 \showboxdepth=5
 
@@ -29,12 +29,12 @@
 	\frametitle{Cíle práce}
 	\uncover<1->{\textbf{Cíl}}
 	\begin{itemize}
-		\item<1-> Komponentu pro simulaci Turingova stroje RAMem
+		\item<1-> Webová aplikace pro simulaci Turingova stroje RAMem
 	\end{itemize}
     \bigskip
     \uncover<1->{\textbf{Zadání práce}}
     \begin{enumerate}
-        \item<1-> Komponenta pro výuku teoretické informatiky
+        \item<1-> Jedna z komponent pro výuku teoretické informatiky
         \item<1-> Možnost zadání vlastní specifikace Turingova stroje
         \item<1-> Současná simulace výpočtu strojů
         \item<1-> Předpřipravené vstupy
@@ -44,8 +44,9 @@
 \section{Teorie}
 \begin{frame} 
 	\setbeamercovered{invisible}
-	\frametitle{Inicializace stroje RAM}
+	\frametitle{Inicializace stroje RAM k simulaci}
     \textbf{Vstup}: instance Turingova Stroje
+    \bigskip
     \begin{enumerate}
         \item Vytvoření slovníku/legendy
         \item Vytvoření kódu stroje RAM
@@ -55,7 +56,7 @@
             \item Pro stavy se symbolem...
             \item Výpis na výstupní pásku
         \end{itemize}
-        \item Enkódování pásky TS a vložení na vstup RAM
+        \item Enkódování symbolů pásky TS a vložení na vstup RAM
         \item Inicializace stroje RAM
     \end{enumerate}
 	
@@ -69,8 +70,8 @@
         \item Každý stroj dědí ze třídy \texttt{Machine}
         \begin{itemize}
             \item Shodné chování mezi stroji
-            \item Jednodušší zpracování chyb
             \item Simulace brána jako samostatný stroj
+            \item Jednodušší zpracování chyb
         \end{itemize}
     \end{itemize}
     \bigskip
@@ -128,6 +129,7 @@
     \uncover<1->{\textbf{Zhodnocení}}
     \begin{itemize}
 		\item<1-> Jednoduché na použití
+        \item<1-> Modulární
 	\end{itemize}
     \bigskip
     \uncover<1->{\textbf{Možné rozšíření}}
@@ -138,13 +140,14 @@
 	\end{itemize}
     \bigskip
     \bigskip
-    \uncover<1->{Dostupné na adrese \texttt{https://ram.koberskyj.cz}}
+    \uncover<1->{Dostupné na adrese: \texttt{https://ram.koberskyj.cz}}
 \end{frame}
 
 \section{Ukončení}
 \begin{frame}
 	\frametitle{Konec}
 
+    \bigskip
     \bigskip
     \bigskip
     \bigskip
@@ -160,7 +163,8 @@
     \bigskip
     \bigskip
     \bigskip
-    Dostupné na adrese \texttt{https://ram.koberskyj.cz}
+    \bigskip
+    Dostupné na adrese: \texttt{https://ram.koberskyj.cz}
 \end{frame}
 
 \end{document}
